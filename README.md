@@ -2,8 +2,8 @@
 
 ## About
 
-This project is all about building a basic shell from scratch in the c language, like our own version of bash. As beginners in programming, it's been a steep learning curve. We've dived into processes, signal handling, file descriptors, and the core workings of shells. Minishell isn't just about coding; it's a journey back in time to understand the challenges before GUI existed. Along the way, we've embraced the struggle, immersed ourselves in documentation, and come out the other side with a deeper understanding and lots of bugs to fix.
-Here is the link to the [subject](https://cdn.intra.42.fr/pdf/pdf/88549/en.subject.pdf)
+Matcha is a full-stack dating app focused on real connections and user privacy. It features smart matching algorithms, real-time chat, and a clean UI/UX. Built with scalability and modularity in mind, it's ideal for learning or extending modern app architecture.
+Here is the link to the [subject](https://cdn.intra.42.fr/pdf/pdf/146222/en.subject.pdf)
 
 ## Team Members:
 
@@ -35,4 +35,3 @@ https://github.com/user-attachments/assets/e04d8ed8-2bc9-4e83-b2cf-7c550e0d307b
 ### Frontend Engineering:
 - Created fully responsive interfaces with ReactJS, minimizing backend requests and optimizing rendering.
 - Designed the frontend using Figma and implemented it with Tailwind CSS.
-

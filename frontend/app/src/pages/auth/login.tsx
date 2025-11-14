@@ -65,7 +65,7 @@ export default function Login() {
             <div className="flex justify-center w-full md:w-[60%]">
                 <div className="flex flex-col items-center justify-center">
                     <h1 className="mb-4 text-5xl poetsen-one-regular text-center">Login to your account</h1>
-                    <p className="mb-4">Enter your email and password to sign in</p>
+                    <p className="mb-4">Enter your username and password to sign in</p>
                     <Formik
                         initialValues={{ username: '', password: '' }}
                         validationSchema={LoginSchema}

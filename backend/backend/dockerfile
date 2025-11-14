@@ -1,15 +1,32 @@
-FROM node:20.9.0
+FROM node:20.9.0 AS base
 
 WORKDIR /app
-
-COPY ./app/package*.json .
+COPY ./app/package*.json ./
 
 RUN npm install
 
-COPY ./app .
+# * Dev to watch changing of the files from the container
+FROM node:20.9.0 AS dev
+WORKDIR /app
+ENV NODE_ENV=development
 
+COPY ./app/package*.json ./
+RUN npm install
+
+CMD ["npm", "run", "dev"]
+
+
+# * Production - target not test it yet
+FROM base AS build
+# need dev deps to compile
+RUN npm install
+COPY ./app .
 RUN npm run build
 
-COPY ./tools/script.sh .
-
+FROM node:20.9.0 AS prod
+WORKDIR /app
+ENV NODE_ENV=production
+COPY ./app/package*.json ./
+RUN npm install --omit=dev
+COPY --from=build /app/dist ./dist
 CMD ["bash", "script.sh"]

@@ -26,13 +26,18 @@ services:
   #     - postgres
   #   networks:
   #     - backend
+
   backend:
-    build: ./backend/backend
-    image: backend
+    build:
+      context: ./backend/backend
+      target: dev
     container_name: backend
-    restart: on-failure
+    # restart: on-failure
     env_file:
       - ./backend/backend/app/.env
+    volumes:
+      - ./backend/backend/app:/app
+      - /app/node_modules
     networks:
       - backend
       # - client_server_net

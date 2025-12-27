@@ -1,4 +1,5 @@
 import zxcvbn from 'zxcvbn';
+import { passwordValidation } from '../types/passwordValidation.js';
 
 export function isUsernameValid(username: string): boolean {
     const usernameRegexp = /^(?!_)(?!.*__)[a-zA-Z0-9_]{4,12}(?<!_)$/
@@ -10,18 +11,22 @@ export function isUsernameValid(username: string): boolean {
     return (usernameRegexp.test(username));
 }
 
-export function isPasswordValid(password: string): boolean {
+export function isPasswordValid(password: string): passwordValidation {
     // * password policy
     const passwordRegexp = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()])[a-zA-Z\d!@#$%^&*() ]{12,28}$/;
 
     if (passwordRegexp.test(password) === false) {
-        console.log('invalid password');
-        return (false);
+        return {
+            status: false,
+            message: "password doesn't adhere to the policy"
+        };
     }
 
     const password_estimation = zxcvbn(password)
-    // TODO :: return feedback as well and display it to the user in the UI, password_estimation.feedback
-    return (password_estimation.score >= 3);
+    return {
+        status: password_estimation.score >= 3,
+        message: password_estimation.feedback.warning,
+    }
 }
 
 export function isEmailFormatValid(email: string): boolean {

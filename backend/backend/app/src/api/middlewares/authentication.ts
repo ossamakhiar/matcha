@@ -1,4 +1,4 @@
-import {Request, Response, NextFunction } from 'express'
+import { Request, Response, NextFunction } from 'express'
 import { isEmailFormatValid, isPasswordValid, isUsernameValid } from '../validators/userCredentials.js';
 import dotenv from 'dotenv'
 
@@ -8,21 +8,19 @@ export function validateLocalLoginBody(request: Request, response: Response, nex
     const { username, password } = request.body;
     const error = 'invalid username or password';
 
-    console.log("login...");
-    console.log(request.body);
     if (!username || !password) {
-        response.status(400).send( { msg: error } );
-        return ;
+        response.status(400).send({ msg: error });
+        return;
     }
 
     if (typeof username != 'string' || typeof password != 'string') {
-        response.status(400).send( { msg: error } );
-        return ;
+        response.status(400).send({ msg: error });
+        return;
     }
 
-    if (!isPasswordValid(password) || !isUsernameValid(username)) {
-        response.status(400).send( { msg: error } );
-        return ;
+    if (!isPasswordValid(password).status || !isUsernameValid(username)) {
+        response.status(400).send({ msg: error });
+        return;
     }
 
     next();
@@ -32,8 +30,8 @@ export function validateForgotPassword(request: Request, response: Response, nex
     const { email } = request.body;
 
     if (!email || !isEmailFormatValid(email)) {
-        response.status(400).send( { msg: 'missing email or invalid email format' } );
-        return ;
+        response.status(400).send({ msg: 'missing email or invalid email format' });
+        return;
     }
 
     next();
@@ -42,9 +40,9 @@ export function validateForgotPassword(request: Request, response: Response, nex
 export function validateResetPassword(request: Request, response: Response, next: NextFunction) {
     const { password } = request.body;
 
-    if (!password || !isPasswordValid(password)) {
-        response.status(400).send( { msg: 'missing or invalid password' } );
-        return ;
+    if (!password || !isPasswordValid(password as string).status) {
+        response.status(400).send({ msg: 'missing or invalid password' });
+        return;
     }
 
     next();

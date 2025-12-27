@@ -1,18 +1,9 @@
-FROM postgres
+# # migration Target --- currently migrations are part of DB Service
+# # but maybe it would make more sense to have them in the backend service
+FROM postgres:16 AS db_migrate
 
-# Install gettext for envsubst
-RUN apt-get update && apt-get install -y gettext
+COPY ./migrations /migrations
 
-# changing ownership to postgres user at build time (it's requiring sudo later on)
-RUN chown postgres:postgres /docker-entrypoint-initdb.d/
+RUN apt-get update && apt-get install -y bash
 
-# Copy the initialization scripts
-COPY ./init_scripts/init.sh /docker-entrypoint-initdb.d/init.sh
-COPY ./init_scripts/init.sql.template /docker-entrypoint-initdb.d/init.sql.template
-
-# Set the correct permissions and ownership for the initialization scripts
-RUN chmod +x /docker-entrypoint-initdb.d/init.sh
-RUN chown postgres:postgres /docker-entrypoint-initdb.d/init.sql.template
-
-# Copying the config file into the container
-COPY conf/postgresql.conf /etc/postgresql/postgresql.conf
+ENTRYPOINT ["bash", "/migrations/migrate.sh"]

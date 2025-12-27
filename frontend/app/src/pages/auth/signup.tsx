@@ -65,8 +65,8 @@ const SignUp = () => {
                 return ;
             }
 
-            const message = formError.message as string;
-            const field = formError.field as string;
+            const message = formError.message;
+            const field = formError.field;
 
             if (field === 'email') {
                 setErrors({ email: message });
@@ -75,6 +75,11 @@ const SignUp = () => {
 
             if (field === 'username') {
                 setErrors({ username: message });
+                return ;
+            }
+
+            if (field === 'password') {
+                setErrors({ password: message });
                 return ;
             }
 

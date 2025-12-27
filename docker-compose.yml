@@ -2,18 +2,22 @@ version: '3.8'
 
 services:
   postgres:
-    build: ./backend/database
-    image: postgres
+    image: postgres:16
     container_name: postgresql
     restart: on-failure
-    env_file:
-      - ./backend/database/.env
+    env_file: ./backend/database/.env
     networks:
       - backend
-    # ports:
-    #   - "${POSTGRES_PORT}:${POSTGRES_PORT}"
-    expose:
-      - "${POSTGRES_PORT}"
+    # # ports:
+    # #   - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   # pgadmin:
   #   image: dpage/pgadmin4
@@ -27,6 +31,21 @@ services:
   #   networks:
   #     - backend
 
+  db_migrate:
+    build:
+      context: ./backend/database
+      target: db_migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # do we actually need the volume? maybe if we make use of node-pg-migrate
+    # volumes:
+    #   - ./backend/database/migrations:/migrations
+    env_file:
+      - ./backend/database/.env
+    networks:
+      - backend
+
   backend:
     build:
       context: ./backend/backend
@@ -37,10 +56,10 @@ services:
       - ./backend/backend/app/.env
     volumes:
       - ./backend/backend/app:/app
+      # Exculde node_modules
       - /app/node_modules
     networks:
       - backend
-      # - client_server_net
     depends_on:
       - postgres
     ports:
@@ -53,15 +72,11 @@ services:
     restart: on-failure
     env_file:
       - ./frontend/app/.env
-    # networks:
-    #   - client_server_net
     depends_on:
       - backend
     ports:
       - ${FRONTEND_PORT}:${FRONTEND_PORT}
 
 networks:
-  client_server_net:
-    driver: bridge
   backend:
     driver: bridge

@@ -3,10 +3,46 @@ import LoggedInHeader from "../components/header/LoggedInHeader";
 import SocketProvider from '../context/SocketProvider';
 import { getCookie } from "../utils/generalPurpose";
 import { useNavigate } from "react-router-dom";
+import { sendLoggedInActionRequest } from "../utils/httpRequests";
 
 type Props = {
     children: ReactNode;
 }
+
+const locationUrl = "http://localhost:3000/send-location";
+
+const LocationBootstrap = () => {
+    useEffect(() => {
+      if (!("geolocation" in navigator)) return;
+  
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude, accuracy } = pos.coords;
+  
+          sendLoggedInActionRequest("POST", locationUrl, {
+            latitude,
+            longitude,
+            accuracy,
+          });
+        },
+        (err) => {
+          if (err.code === err.TIMEOUT) {
+            console.warn("Location timeout — ignoring");
+            return;
+          }
+          console.error("Geolocation error:", err.message);
+        },
+        {
+          enableHighAccuracy: false,
+          timeout: 20000,
+          maximumAge: Infinity,
+        }
+      );
+    }, []);
+  
+    return null;
+  };
+  
 
 const LoggedInLayout: FC<Props> = ({children}) =>  {
 
@@ -46,6 +82,7 @@ const LoggedInLayout: FC<Props> = ({children}) =>  {
     return (
         <>
             <SocketProvider>
+                <LocationBootstrap />
                 <LoggedInHeader />
                 {children}
             </SocketProvider>

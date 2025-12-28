@@ -1,8 +1,9 @@
 import { Request, Response } from 'express'
 import { likeProfileService, blockUserService, reportFakeAccountService, getBriefProfileInfosService, getProfileInfosService, updateUserInterestsService, unlikeProfileService, addUserInterestsService } from '../services/profile.js';
 import { getUserIdFromJwtService } from '../services/jwt.js';
-import { updatePersonalInfosService } from '../services/complete-profile.js';
+import { updatePersonalInfosService, updateUserLocation } from '../services/complete-profile.js';
 import { isArray } from '../validators/generalPurpose.js';
+import { getHttpError } from '../helpers/getErrorObject.js';
 
 export async function getProfileInfosController(request: Request, response: Response) {
     const profileId = Number(request.params.userId);
@@ -238,5 +239,23 @@ export async function updatePersonalInfosController(request: Request, response: 
     }
     catch (err) {
         response.sendStatus(500);
+    }
+}
+
+
+
+export async function storeUserLocation(request: Request, response: Response) {
+    const userId = request.user.id;
+    // TODO : add an indicator when the user denied, to use an IP geolocation fallback
+    // const {longitude, latitude} = request.body.coords;
+
+    // console.log(`longitude: ${longitude}; latitude: ${latitude}`)
+    console.log(request.body)
+    try {
+        await updateUserLocation(userId, request.body);
+        response.sendStatus(200);
+    } catch (e) {
+        const {status, message} = getHttpError(e);
+        response.status(status).json({status, message});
     }
 }

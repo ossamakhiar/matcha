@@ -12,6 +12,8 @@ export type UserInfos = {
     firstName: string;
     lastName: string;
     userName: string;
+    longitude: number;
+    latitude: number;
     age: number;
     gender: string;
     sexualPreferences: string;

@@ -34,6 +34,7 @@ function UserProfile() {
     let [errorOccurred, setErrorOccurred] = useState(false);
     let navigate = useNavigate();
 
+    // TODO : this should be part of LoggedInLayout
     useEffect(() => {
         (async function initializeComponent() {
             setIsLoading(true);

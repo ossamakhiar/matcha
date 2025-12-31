@@ -8,7 +8,7 @@ export async function getSearchResult(request: Request, response: Response) {
     const page = Number(request.query.page) || 0;
     const pageSize = Number(request.query.pageSize) || 20;
 
-    if (!searchQuery || typeof searchQuery != 'string') {
+    if (typeof searchQuery != 'string') {
         response.json([]);
         return ;
     }

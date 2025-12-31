@@ -4,6 +4,7 @@ import SocketProvider from '../context/SocketProvider';
 import { getCookie } from "../utils/generalPurpose";
 import { useNavigate } from "react-router-dom";
 import { sendLoggedInActionRequest } from "../utils/httpRequests";
+import UserInfoProvider from "../context/UserProvider";
 
 type Props = {
     children: ReactNode;
@@ -80,13 +81,13 @@ const LoggedInLayout: FC<Props> = ({children}) =>  {
     }
 
     return (
-        <>
-            <SocketProvider>
-                <LocationBootstrap />
-                <LoggedInHeader />
-                {children}
-            </SocketProvider>
-        </>
+      <SocketProvider>
+        <UserInfoProvider>
+          <LocationBootstrap />
+          <LoggedInHeader />
+          {children}
+        </UserInfoProvider>
+      </SocketProvider>
     )
 }
 

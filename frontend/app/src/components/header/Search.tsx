@@ -31,7 +31,6 @@ function Search({isSmallSearchOpen, handleSearchOpen, handleSearchClose}: Search
     }
 
     function handleBlur() {
-        console.log('blurr')
         setIsSearchOnFocus(false);
         setSearchResults([]);
         handleSearchClose();

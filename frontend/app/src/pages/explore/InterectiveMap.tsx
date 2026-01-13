@@ -10,7 +10,7 @@ import {
 import useOutsideClick from "../../hooks/useOutsideClick";
 import { FaX } from "react-icons/fa6";
 import { useEffect, useMemo, useState } from "react";
-import { PiNavigationArrow } from "react-icons/pi";
+// import { PiNavigationArrow } from "react-icons/pi";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useCurrentUserInfo } from "../../context/UserProvider";
 import { UserInfos } from "../../types/profile";

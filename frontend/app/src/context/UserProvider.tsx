@@ -4,7 +4,7 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { UserInfos } from '../types/profile';
 import { sendLoggedInGetRequest } from '../utils/httpRequests';
-import { isOfProfileInfosType } from '../utils/typeGuards';
+// import { isOfProfileInfosType } from '../utils/typeGuards';
 
 type Props = {
     children: ReactNode;
@@ -14,7 +14,7 @@ const   UserInfoContext = createContext<UserInfos | null>(null);
 
 const   UserInfoProvider = ({children}: Props) => {
     const [profileInfos, setProfileInfos] = useState<UserInfos | null>(null)
-    const [errors, setErrorOccurred] = useState<boolean>(false)
+    // const [errors, setErrorOccurred] = useState<boolean>(false)
 
     useEffect(() => {
         (async function initializeComponent() {
@@ -31,7 +31,7 @@ const   UserInfoProvider = ({children}: Props) => {
                 setProfileInfos(responseBody.profileInfos.userInfos);
             } catch(err) {
                 console.log(err)
-                setErrorOccurred(true);
+                // setErrorOccurred(true);
             }
         })();
     }, [])

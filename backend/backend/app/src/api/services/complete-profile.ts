@@ -27,7 +27,7 @@ export async function addUserPhotosService(userId: number, imageUrls: string[]) 
         throw new Error('Failed to add user photos');
     } finally {
         client.release();
-    }   
+    }
 }
 
 export async function updatePersonalInfosService(userId: number, profileInfos: updateProfilePersonalInfos) {
@@ -47,9 +47,9 @@ export async function updatePersonalInfosService(userId: number, profileInfos: u
         client = await pool.connect();
 
         await client.query(query, [profileInfos.firstname, profileInfos.lastname,
-            profileInfos.age, profileInfos.biography, profileInfos.gender,
-            profileInfos.sexualPreference, profileInfos.username,
-            profileInfos.profilePicturePath,
+        profileInfos.age, profileInfos.biography, profileInfos.gender,
+        profileInfos.sexualPreference, profileInfos.username,
+        profileInfos.profilePicturePath,
             userId
         ])
     }
@@ -78,5 +78,25 @@ export async function setProfileAsCompleteService(userId: number) {
         if (client) {
             client.release();
         }
+    }
+}
+
+
+export async function updateUserLocation(userId: number, coords: any) {
+    let client;
+
+    try {
+        client = await pool.connect();
+        const query = `UPDATE "user" SET
+                    latitude = $1,
+                    longitude = $2
+                    WHERE id = $3;`;
+
+        await client.query(query, [coords.latitude, coords.longitude, userId]);
+    }
+    catch (err) {
+        throw err;
+    } finally {
+        client && client.release();
     }
 }

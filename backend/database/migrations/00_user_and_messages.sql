@@ -21,6 +21,9 @@ CREATE TABLE "user" (
     likes_count INTEGER DEFAULT 0,
     fake_account_reports_count INTEGER DEFAULT 0,
     profile_picture VARCHAR(255),
+    latitude NUMERIC(9,6),
+    longitude NUMERIC(9,6),
+    location_updated_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

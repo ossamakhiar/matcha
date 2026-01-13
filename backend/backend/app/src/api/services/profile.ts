@@ -68,7 +68,7 @@ async function getUserInfos(userId: number, visitorUserId: number): Promise<User
     try {
         client = await pool.connect();
         const query = `SELECT first_name, last_name, username, age, gender,
-            sexual_preference, biography, profile_picture, fame_rating FROM "user" WHERE id = $1;`
+            sexual_preference, biography, profile_picture, fame_rating, longitude, latitude FROM "user" WHERE id = $1;`
 
         const result = await client.query(query, [userId]);
 
@@ -110,6 +110,8 @@ async function getUserInfos(userId: number, visitorUserId: number): Promise<User
             firstName: user.first_name,
             lastName: user.last_name,
             userName: user.username,
+            longitude: Number(user.longitude),
+            latitude: Number(user.latitude),
             age: user.age ?? 18,
             gender: user.gender ?? '',
             sexualPreferences: user.sexual_preference ?? '',

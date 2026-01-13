@@ -68,6 +68,7 @@ export async function sendFormDataRequest(method: string, url: string, formData:
     return (responseBody);
 }
 
+// loosely typed for now
 export async function sendLoggedInActionRequest(method: string, url: string, data?: any, contentType?: string) {
     const csrfClientExposedCookie = getCookie('csrfClientExposedCookie');
 

@@ -12,8 +12,9 @@ import { sendLoggedInActionRequest } from "../../utils/httpRequests"
 import NoResult from "../../components/utils/no-results/NoResults"
 import ErrorOccurred from "../../components/utils/error-occurred/ErrorOccurred"
 import { isOfRecommendedProfileInfosType } from "../../utils/typeGuards"
-import { FaArrowLeft } from "react-icons/fa6"
+import { FaArrowLeft, FaMap } from "react-icons/fa6"
 import { Link, useNavigate } from "react-router-dom"
+import { InteractiveMap } from "./InterectiveMap"
 
 const   MatchedUserSummary = ({firstName, lastName, fameRating, age, gender}: MatchedUserSummaryProps) => {
     return (
@@ -50,7 +51,7 @@ function BioAndInterests({biography, userInterests}: BioAndInterestsProps) {
                     {
                         interests.map(
                             (interest, index) => (
-                                <div id={`Interest-${index + 1}`} className={`flex justify-center tag cursor-pointer max-w-32 fit-box ${userInterests.has(interest) ? 'bg-button-pink' : ''}`}>
+                                <div key={`Interest-${index + 1}`} className={`flex justify-center tag cursor-pointer max-w-32 fit-box ${userInterests.has(interest) ? 'bg-button-pink' : ''}`}>
                                     <h3>#{interest}</h3>
                                 </div>
                             )
@@ -96,6 +97,7 @@ const   MatchedProfile = ({ profileInfos }: { profileInfos: RecommendedProfileIn
 
 const Explore = () => {
     let [isFilterOverlayOpen, setIsFilterOverlayOpen] = useState(false);
+    let [isMapOpen, setIsMapOpen] = useState(false);
     let [fameRatingRange, setFameRatingRange] = useState([0, 5]);
     let [ageRange, setAgeRange] = useState([18, 30]);
     let [interests, setInterests] = useState<Set<string>>();
@@ -226,6 +228,9 @@ const Explore = () => {
                 <button  onClick={handleFilterButtonClick} className="bg-blue-950 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center hover:scale-125 transition-transform duration-300 ease-in-out">
                     <ImFilter className="fill-white" size={30} />
                 </button>
+                <button  onClick={() => setIsMapOpen(true)} className="bg-blue-950 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center hover:scale-125 transition-transform duration-300 ease-in-out">
+                    <FaMap className="fill-white" size={30} />
+                </button>
                 <button className="bg-blue-950 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center hover:scale-125 transition-transform duration-300 ease-in-out">
                     <FaHeart onClick={handleLikeButtonClick} className="fill-white" size={30} />
                 </button>
@@ -233,6 +238,7 @@ const Explore = () => {
                     <FaArrowRight onClick={handleRightArrowClick} className="fill-white" size={34} />
                 </button>
             </div>
+            {isMapOpen && <InteractiveMap onClose={() => setIsMapOpen(false)} />}
         </div>
     )
 }

@@ -61,7 +61,7 @@ function FameRatingInput({initialStarsCount = 0, minStarsCount = 0, maxStarsCoun
                         }
 
                         return (
-                            <div id={String(star)}>
+                            <div key={String(star)}>
                                 <FaStar onClick={() => handleClick(star)} onMouseEnter={() => handleMouseEnter(star)} onMouseLeave={handleMouseLeave} style={{width: size, height: size, color: `${color}`}} />
                             </div>
                         )

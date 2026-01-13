@@ -5,8 +5,6 @@ import { UserInfos } from "../types/profile.js";
 
 // ! should i return the user himself who requested the search if the its info matchs the search query? id <> $1
 export async function getSearchResultService(userId: number, searchQueryStr: string, page: number, pageSize: number): Promise<UserInfos[]> {
-    console.log(searchQueryStr);
-
     const client = await pool.connect();
     const searchQuery = `
                     SELECT
@@ -15,6 +13,8 @@ export async function getSearchResultService(userId: number, searchQueryStr: str
                         u.first_name,
                         u.last_name,
                         u.profile_picture,
+                        u.longitude,
+                        u.latitude,
                         u.gender,
                         u.age,
                         u.sexual_preference,
@@ -61,6 +61,8 @@ export async function getSearchResultService(userId: number, searchQueryStr: str
                 lastName: result.last_name,
                 gender: result.gender,
                 profilePicture: profilePicture,
+                longitude: Number(result.longitude),
+                latitude: Number(result.latitude),
                 isSelf: result.is_self,
                 isLiked: result.is_liked,
                 isLiking: result.is_liking,

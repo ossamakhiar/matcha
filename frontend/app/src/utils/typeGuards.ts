@@ -1,4 +1,4 @@
-import { BriefProfileInfos, RecommendedProfileInfos } from "../types/profile";
+import { BriefProfileInfos, ProfileInfos, RecommendedProfileInfos, UserInfos } from "../types/profile";
 import { isArray } from "./generalPurpose";
 
 export function getFormError(error: unknown): FormError | undefined {
@@ -16,16 +16,18 @@ export function getFormError(error: unknown): FormError | undefined {
     return (undefined);
 }
 
-function isOfUserInfosType(obj: any) {
+export function isOfUserInfosType(obj: any): obj is UserInfos {
     return (
     obj !== null && typeof obj === 'object' &&
-    typeof obj.id === 'string' &&
+    // typeof obj.id === 'string' && // !! there is an inconsitenty here it could be number
     typeof obj.isSelf === 'boolean' &&
     typeof obj.isLiked === 'boolean' &&
     typeof obj.isLiking === 'boolean' &&
     typeof obj.firstName === 'string' &&
     typeof obj.lastName === 'string' &&
     typeof obj.userName === 'string' &&
+    typeof obj.longitude === 'number' &&
+    typeof obj.latitude === 'number' &&
     typeof obj.age === 'number' &&
     typeof obj.gender === 'string' &&
     typeof obj.sexualPreferences === 'string' &&
@@ -35,7 +37,7 @@ function isOfUserInfosType(obj: any) {
     );
 }
 
-export function isOfProfileInfosType(obj: any) {
+export function isOfProfileInfosType(obj: any) : obj is ProfileInfos {
     return (
         obj !== null && typeof obj === 'object'
         && isArray(obj.interests, undefined, 'string')

@@ -81,11 +81,11 @@ async function filterProfilesByPersonalInfos(
         const sexualPreferences = getMatchingSexualOrientation(userPreferences.gender, userPreferences.sexual_preference);
         const oppositeGenders = getOppositeGenders(userPreferences.gender);
 
-        console.log('suggestedSexualPreferences: ' + sexualPreferences);
-        console.log('suggestedGenders: ' + oppositeGenders);
+        // console.log('suggestedSexualPreferences: ' + sexualPreferences);
+        // console.log('suggestedGenders: ' + oppositeGenders);
 
         const profilesQuery = `
-            SELECT id, first_name, last_name, username, age, gender,
+            SELECT id, first_name, last_name, username, latitude, longitude, age, gender,
             sexual_preference, biography, profile_picture, fame_rating 
             FROM "user" 
             WHERE id != $1 
@@ -119,6 +119,8 @@ async function filterProfilesByPersonalInfos(
                 firstName: user.first_name,
                 lastName: user.last_name,
                 userName: user.username,
+                latitude: Number(user.latitude),
+                longitude: Number(user.longitude),
                 age: user.age ?? 18,
                 gender: user.gender ?? '',
                 sexualPreferences: user.sexual_preference ?? '',

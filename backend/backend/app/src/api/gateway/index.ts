@@ -13,7 +13,7 @@ function onConnection(client: Socket) {
     const userId = extractUserId(client);
     const registerHandlers: RegisterHandler[] = [registerChatHandlers, registerNotificationHandlers];
 
-    console.log(`new Client userID ${userId} socketID ${client.id}`)
+    // console.log(`new Client userID ${userId} socketID ${client.id}`)
 
     socketManager.addSocket(userId, client);
     // Register all the socket listeners
@@ -24,15 +24,15 @@ function onConnection(client: Socket) {
         registerHandler(client);
     })
 
-    console.log("broadcasting....");
+    // console.log("broadcasting....");
     client.broadcast.emit("global:online-users", socketManager.getConnectedUsers());
-    console.log(socketManager.getSockets().length);
+    // console.log(socketManager.getSockets().length);
     // socketManager.getSockets().forEach((socket) => {
     //     socket.emit('global:online-users', {onlineUsers: socketManager.getConnectedUsers()});
     // })
 
     client.on("disconnect", (reason) => {
-        console.log(`disconnect ${reason}`);    
+        // console.log(`disconnect ${reason}`);    
         handleDisconnect(client);
     });
 }
@@ -40,7 +40,7 @@ function onConnection(client: Socket) {
 
 function handleDisconnect(socket: Socket) {
     const userId = extractUserId(socket);
-    console.log(`Client userId ${userId}, socketId ${socket.id} disconnected`)
+    // console.log(`Client userId ${userId}, socketId ${socket.id} disconnected`)
     socketManager.removeSocket(userId, socket);
 
     if (!socketManager.isUserOnline(userId))

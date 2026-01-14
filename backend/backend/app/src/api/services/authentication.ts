@@ -12,7 +12,7 @@ export async function loginVerificationService(username: string, password: strin
         const result = await client.query(query, [username]);
 
         if (result.rows.length === 0) {
-            console.log("no results");
+            // console.log("no results");
 
             return ([undefined, false]);
         }
@@ -20,15 +20,15 @@ export async function loginVerificationService(username: string, password: strin
         const user = result.rows[0];
 
         if (!user.is_verified) {
-            console.log("not verified");
+            // console.log("not verified");
             return ([undefined, false]);
         }
 
         if (!await compareDataWithSaltService(password, user.password, user.password_salt)) {
-            console.log("invalid password");
+            // console.log("invalid password");
             return ([undefined, false]);
         }
-        console.log(user);
+        // console.log(user);
         return ([user.id, user.is_profile_complete]);
     }
     catch (err) {

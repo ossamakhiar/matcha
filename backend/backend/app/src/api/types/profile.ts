@@ -27,6 +27,8 @@ export type RecommendedProfileInfos = {
     firstName: string;
     lastName: string;
     userName: string;
+    latitude: number;
+    longitude: number;
     age: number;
     gender: string;
     sexualPreferences: string;

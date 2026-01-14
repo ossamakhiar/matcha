@@ -6,6 +6,9 @@ up: all
 down:
 	@docker compose down
 
+logs:
+	@docker compose logs
+
 clean:
 	@docker image rm postgres
 	@docker volume rm $$(docker volume ls -q)

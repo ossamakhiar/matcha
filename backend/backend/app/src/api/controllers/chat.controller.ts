@@ -47,7 +47,7 @@ export async function getDmHistory(request: Request, response: Response) {
     const   userId = request.user.id;
     const   participantId: number = +request.params.userId;
 
-    console.log(request.query);
+    // console.log(request.query);
     const   page = Number(request.query.page) || 0;
     const   pageSize = Number(request.query.pageSize) || 20;
 

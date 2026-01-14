@@ -32,9 +32,9 @@ async function sendMessageHandler(client: Socket, message: IncomingMessagePayloa
 
     // !! validate the emitted object
     // checking the message type should be either 'text' ot 'audio'
-    console.log(`senderId: ${senderId}`)
-    console.log(`receiverId: ${receiverId}`)
-    console.log('dataaaaaaaaaaaaaaa')
+    // console.log(`senderId: ${senderId}`)
+    // console.log(`receiverId: ${receiverId}`)
+    // console.log('dataaaaaaaaaaaaaaa')
     if (senderId === receiverId)
         return ;
 
@@ -43,7 +43,7 @@ async function sendMessageHandler(client: Socket, message: IncomingMessagePayloa
     if (!await areMatched(senderId, receiverId))
         throw new ApplicationError('you\'re not matched');
 
-    console.log(receiverBreif);
+    // console.log(receiverBreif);
     const senderBrief = await getUserBrief(senderId);
 
     const   createdDm = await messagePersistencyHandler(senderId, receiverId, message.messageType, message.messageContent)
@@ -54,7 +54,7 @@ async function sendMessageHandler(client: Socket, message: IncomingMessagePayloa
 
 
     const notification = await createNewNotification(receiverId, senderBrief!, NotificationTypesEnum.NEW_MESSAGE);
-    console.log(notification);
+    // console.log(notification);
     emitNotificationEvent(receiverId, notification);
 
 }

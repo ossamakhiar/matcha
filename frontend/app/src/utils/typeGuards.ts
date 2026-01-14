@@ -1,4 +1,4 @@
-import { BriefProfileInfos, ProfileInfos, RecommendedProfileInfos, UserInfos } from "../types/profile";
+import { BackendRecommendedProfile, BriefProfileInfos, Coords, ProfileInfos, UserInfos } from "../types/profile";
 import { isArray } from "./generalPurpose";
 
 export function getFormError(error: unknown): FormError | undefined {
@@ -62,9 +62,10 @@ export function isOfBriefProfileInfosType(obj: any): obj is BriefProfileInfos {
     );
 }
 
-export function isOfRecommendedProfileInfosType(obj: any): obj is RecommendedProfileInfos {
+export function isOfBackendRecommendedProfileType(obj: any): obj is BackendRecommendedProfile {
     return (
-        obj !== null && typeof obj === 'object' &&
+        obj !== null &&
+        typeof obj === 'object' &&
         typeof obj.id === 'string' &&
         typeof obj.firstName === 'string' &&
         typeof obj.lastName === 'string' &&
@@ -76,9 +77,22 @@ export function isOfRecommendedProfileInfosType(obj: any): obj is RecommendedPro
         typeof obj.biography === 'string' &&
         typeof obj.fameRating === 'number' &&
         typeof obj.commonInterestsCount === 'number' &&
-        isArray(obj.profileInterests, undefined, 'string') &&
-        isArray(obj.profilePhotos, undefined, 'string')
+        typeof obj.latitude === 'number' &&
+        typeof obj.longitude === 'number' &&
+        Array.isArray(obj.profileInterests) &&
+        obj.profileInterests.every((i: any) => typeof i === 'string') &&
+        Array.isArray(obj.profilePhotos) &&
+        obj.profilePhotos.every((p: any) => typeof p === 'string')
     );
+}
+
+
+export function isOfCoordsType(obj: any): obj is Coords {
+    return (
+        obj !== null && typeof obj === 'object' &&
+        typeof obj.lat === 'number' &&
+        typeof obj.lon === 'number'
+    )
 }
 
 // export type RecommendedProfileInfos = {

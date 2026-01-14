@@ -40,6 +40,8 @@ export type RecommendedProfileInfos = {
     firstName: string;
     lastName: string;
     userName: string;
+    longitude: number;
+    latitude: number;
     age: number;
     gender: string;
     sexualPreferences: string;
@@ -49,4 +51,13 @@ export type RecommendedProfileInfos = {
     commonInterestsCount: number;
     profileInterests: Set<string>;
     profilePhotos: string[];
+};
+
+export type BackendRecommendedProfile= Omit<RecommendedProfileInfos, 'profileInterests'> & {
+    profileInterests: string[];
+};
+
+export type Coords = {
+    lat: number;
+    lon: number;
 };

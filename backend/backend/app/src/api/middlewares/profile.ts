@@ -32,3 +32,28 @@ export async function blockMiddleware(request: Request, response: Response, next
 
     next();
 }
+
+export async function validStoreUserLocation(request: Request, response: Response, next: NextFunction) {
+    const { longitude, latitude } = request.body;
+
+    if (
+        typeof longitude !== "number" ||
+        typeof latitude !== "number" ||
+        !Number.isFinite(longitude) ||
+        !Number.isFinite(latitude)
+    ) {
+        response.status(400).json({ error: "Invalid latitude or longitude type" });
+        return;
+    }
+
+    // geographic constraints
+    if (
+        latitude < -90 || latitude > 90 ||
+        longitude < -180 || longitude > 180
+    ) {
+        response.status(400).json({ error: "Latitude or longitude out of range" });
+        return;
+    }
+
+    next();
+}

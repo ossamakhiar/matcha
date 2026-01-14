@@ -6,9 +6,9 @@ export function validateAuthToken(request: Request, response: Response, next: Ne
     const token = extractAuthTokenService(authHeader);
 
     if (!token) {
-        console.log('auth middleware failed!');
+        // console.log('auth middleware failed!');
         response.status(400).send( { msg: 'invalid or missing token' } );
     }
-    console.log('auth middleware passed!');
+    // console.log('auth middleware passed!');
     next();
 }

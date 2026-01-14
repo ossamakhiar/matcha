@@ -12,7 +12,7 @@ import {
     updatePersonalInfosController,
     storeUserLocation
 } from "../controllers/profile.js";
-import { blockMiddleware, validateUserIdParam } from "../middlewares/profile.js";
+import { blockMiddleware, validateUserIdParam, validStoreUserLocation } from "../middlewares/profile.js";
 import { validateJwtToken, validateCSRFCookies } from "../middlewares/authorization.js";
 import { validateCompleteProfileBody } from "../middlewares/complete-info.js";
 import upload from "../middlewares/upload.js";
@@ -32,8 +32,6 @@ router.post('/reportFakeAccount/:userId', validateUserIdParam, blockMiddleware, 
 router.post('/likeProfile/:userId', validateUserIdParam, blockMiddleware, likeProfileController);
 router.post('/unlikeProfile/:userId', validateUserIdParam, blockMiddleware, unlikeProfileController);
 router.post('/updatePersonalInfos', upload.single('profilePicture'), validateCompleteProfileBody, updatePersonalInfosController);
-
-// Add a validator for the body..
-router.post("/send-location", storeUserLocation)
+router.post("/send-location", validStoreUserLocation, storeUserLocation)
 
 export default router;

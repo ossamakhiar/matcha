@@ -39,7 +39,7 @@ export function validateJwtToken(request: Request, response: Response, next: Nex
         setAccessTokensCookie(userId, response);
     }
 
-    console.log(`JWT TOKENS VALIDATED!`);
+    // console.log(`JWT TOKENS VALIDATED!`);
     request.user = { id: accessTokenResult.userId as number }; // attaching the jwt payload, to access it easily later
     next();
 }
@@ -65,6 +65,6 @@ export function validateCSRFCookies(request: Request, response: Response, next: 
         return ;
     }
 
-    console.log('CSRF validated');
+    // console.log('CSRF validated');
     next();
 }

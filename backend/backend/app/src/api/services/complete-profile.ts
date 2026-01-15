@@ -54,9 +54,11 @@ export async function updatePersonalInfosService(userId: number, profileInfos: u
         ])
     }
     catch (err) {
-
+        throw err;
     } finally {
-
+        if (client) {
+            client.release();
+        }
     }
 }
 

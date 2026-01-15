@@ -126,8 +126,6 @@ const Explore = () => {
 
             console.log('recommendedProfiles: ', responseBody.recommendedProfiles);
 
-            console.log('typeof coords: ' + typeof responseBody.recommendedProfiles[0].latitude);
-
             if (!responseBody || !responseBody.recommendedProfiles
                 || !Array.isArray(responseBody.recommendedProfiles)
                 || !responseBody.recommendedProfiles.every( (recommendedProfile: any) => isOfBackendRecommendedProfileType(recommendedProfile))) {
@@ -146,6 +144,7 @@ const Explore = () => {
             setCurrIndex(0);
         }
         catch (err) {
+            console.log('hereeeee222', err);
             setErrorOccurred(true);
         } finally {
             setIsLoading(false);

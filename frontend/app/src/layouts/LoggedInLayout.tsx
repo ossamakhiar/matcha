@@ -20,16 +20,14 @@ const LocationBootstrap = () => {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const { latitude, longitude } = pos.coords;
-          console.log(`coords: ${latitude}, ${longitude}`);
+          console.log(`geolocation coords: ${latitude}, ${longitude}`);
   
           sendLoggedInActionRequest("POST", locationUrl, {
             latitude,
             longitude,
           });
         },
-        async (err) => {
-          console.log('Geolocation Failed!!!');
-          console.log(err);
+        async (_) => {
           // if geolocation.getCurrentPosition failed, we consider Ip fallback
           const data = await sendGetRequestWithoutCreds('http://ip-api.com/json/?fields=lat,lon');
 
@@ -40,7 +38,7 @@ const LocationBootstrap = () => {
 
           // store coords got from IP fallback
           const { lat, lon } = data;
-          console.log(`coords: ${lat}, ${lon}`);
+          console.log(`IP fallback coords: ${lat}, ${lon}`);
           sendLoggedInActionRequest("POST", locationUrl, {
             latitude: lat,
             longitude: lon

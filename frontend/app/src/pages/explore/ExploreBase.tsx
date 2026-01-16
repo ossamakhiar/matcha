@@ -5,16 +5,16 @@ import { TbGenderAndrogyne, TbGenderFemme, TbGenderMale } from "react-icons/tb"
 import interests from "../../utils/interests"
 import FameRatingDisplay from "../../components/utils/FameRatingDisplay"
 import { BioAndInterestsProps, MatchedUserSummaryProps } from "./types"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import FilterOverlay from "../../components/explore/FilterOverlay"
 import { RecommendedProfileInfos } from "../../types/profile"
 import { sendLoggedInActionRequest } from "../../utils/httpRequests"
 import NoResult from "../../components/utils/no-results/NoResults"
 import ErrorOccurred from "../../components/utils/error-occurred/ErrorOccurred"
-import { isOfBackendRecommendedProfileType } from "../../utils/typeGuards"
 import { FaArrowLeft, FaMap } from "react-icons/fa6"
 import { Link, useNavigate } from "react-router-dom"
 import { InteractiveMap } from "./InterectiveMap"
+import { SortOption } from "../../types/explore"
 
 const   MatchedUserSummary = ({firstName, lastName, fameRating, age, gender}: MatchedUserSummaryProps) => {
     return (
@@ -81,7 +81,7 @@ const   MatchedProfile = ({ profileInfos }: { profileInfos: RecommendedProfileIn
                 {
                     profileInfos && profileInfos.profilePhotos && profileInfos.profilePhotos.length > 0 ?
                     profileInfos.profilePhotos.map((pictureURL) => (
-                        <div className="relative aspect-[2/3] overflow-y-auto scrollbar overflow-x-hidden mb-6 pr-4">
+                        <div className="relative aspect-[2/3] overflow-y-auto scrollbar overflow-x-hidden mb-6 pr-4" key={pictureURL}>
                             <img src={pictureURL} className="w-full h-full object-cover rounded-2xl shadow-lg shadow-blue-500" />
                         </div>
                     )) : null
@@ -95,79 +95,33 @@ const   MatchedProfile = ({ profileInfos }: { profileInfos: RecommendedProfileIn
     )
 }
 
-const Explore = () => {
+type ExploreBaseProps = {
+    recommendedProfiles: RecommendedProfileInfos[];
+    isAdvancedSearch: Boolean;
+    fetchProfiles: () => void;
+    updateFiltersAndSortBy?: (
+        newFameRatingRange: number[],
+        newAgeRange: number[],
+        newInterests: Set<string>,
+        newMaxDistanceKm: number,
+        newSortBy: SortOption 
+    ) => void;
+};
+
+const ExploreBase = ( { recommendedProfiles, isAdvancedSearch, fetchProfiles, updateFiltersAndSortBy }: ExploreBaseProps ) => {
     let [isFilterOverlayOpen, setIsFilterOverlayOpen] = useState(false);
     let [isMapOpen, setIsMapOpen] = useState(false);
-    let [fameRatingRange, setFameRatingRange] = useState([0, 5]);
-    let [ageRange, setAgeRange] = useState([18, 30]);
-    let [maxDistanceKm, setMaxDistanceKm] = useState(500);
-    let [interests, setInterests] = useState<Set<string>>();
     let [currIndex, setCurrIndex] = useState(0);
-    let [recommendedProfiles, setRecommendedProfiles] = useState<RecommendedProfileInfos[]>();
-    let [isLoading, setIsLoading] = useState(true);
     let [errorOccurred, setErrorOccurred] = useState(false);
-    let [noResult, setNoResult] = useState(false);
+    const noResult = recommendedProfiles.length == 0;
+
     let navigate = useNavigate();
 
-    async function fetchProfiles() {
-        setIsLoading(true);
-        setErrorOccurred(false);
-        setNoResult(false);
-        try {
-            const requestBody: {[key: string]: any} = { fameRatingRange, ageRange, maxDistanceKm, commonInterestsTreshold: 1 };
-
-            if (interests) {
-                requestBody['interests'] = [...interests];
-            }
-
-            console.log('AgeFilter: ' + requestBody.ageRange);
-            console.log('FameRatingFilter: ' + requestBody.fameRatingRange);
-            console.log('maxDistanceKm: ' + requestBody.maxDistanceKm);
-            console.log('commonInterestsTreshold: ' + requestBody.commonInterestsTreshold);
-
-            const responseBody = await sendLoggedInActionRequest('POST', import.meta.env.VITE_LOCAL_RECOMMENDED_PROFILES_API_URL, requestBody);
-
-            console.log('recommendedProfiles: ', responseBody.recommendedProfiles);
-
-            if (!responseBody || !responseBody.recommendedProfiles
-                || !Array.isArray(responseBody.recommendedProfiles)
-                || !responseBody.recommendedProfiles.every( (recommendedProfile: any) => isOfBackendRecommendedProfileType(recommendedProfile))) {
-                console.log('hereeeee');
-                setErrorOccurred(true);
-                return ;
-            }
- 
-            if (responseBody.recommendedProfiles.length == 0) {
-                setNoResult(true)
-                return ;
-            }
-
-            responseBody.recommendedProfiles.forEach((item: any) => item.profileInterests = new Set(item.profileInterests));
-            setRecommendedProfiles(responseBody.recommendedProfiles);
-            setCurrIndex(0);
-        }
-        catch (err) {
-            console.log('hereeeee222', err);
-            setErrorOccurred(true);
-        } finally {
-            setIsLoading(false);
-        }
-    }
-
-    useEffect(() => {
-        fetchProfiles();
-    }, [fameRatingRange, ageRange, interests]);
-
-    if (isLoading) {
-        return ;
-    }
-
-    function handleFilterOverlayClose(newFameRatingRange: number[], newAgeRange: number[], newInterests: Set<string>, newMaxDistanceKm: number) {
+    function handleFilterOverlayClose(newFameRatingRange: number[], newAgeRange: number[], newInterests: Set<string>, newMaxDistanceKm: number, newSortBy: SortOption) {
         setIsFilterOverlayOpen(false);
-        setFameRatingRange(newFameRatingRange);
-        setAgeRange(newAgeRange);
-        setInterests(newInterests);
-        setMaxDistanceKm(newMaxDistanceKm);
+        if (updateFiltersAndSortBy) {
+            updateFiltersAndSortBy(newFameRatingRange, newAgeRange, newInterests, newMaxDistanceKm, newSortBy);
+        }
     }
 
     function handleFilterButtonClick() {
@@ -220,17 +174,17 @@ const Explore = () => {
         <div className="flex justify-center w-screen pl-4 pr-4 md:pl-6 md:pr-6 lg:pl-10 lg:pr-10 xl:pl-32 xl:pr-32 2xl:pl-44 2xl:pr-44">
             { noResult && <NoResult />}
             { errorOccurred && <ErrorOccurred />}
-            <div className={isFilterOverlayOpen == false || errorOccurred ? 'hidden' : ''}>
+            <div className={(!isAdvancedSearch || isFilterOverlayOpen == false || errorOccurred) ? 'hidden' : ''}>
                 <FilterOverlay handleFilterOverlayClose={handleFilterOverlayClose}/>
             </div>
             <div className={`pt-4 flex justify-center md:pt-6 w-screen ${errorOccurred || noResult ? 'hidden' : ''}`}>
-                {recommendedProfiles && <MatchedProfile profileInfos={recommendedProfiles[currIndex]}/>}
+                {recommendedProfiles && recommendedProfiles.length > 0 && <MatchedProfile profileInfos={recommendedProfiles[currIndex]}/>}
             </div>
             <div className="fixed z-20 pb-4 bottom-1 flex justify-center gap-2 sm:gap-4">
                 <button className="bg-blue-950 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center hover:scale-125 transition-transform duration-300 ease-in-out">
                     <FaArrowLeft onClick={handleLeftArrowClick} className="fill-white" size={34} />
                 </button>
-                <button  onClick={handleFilterButtonClick} className="bg-blue-950 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center hover:scale-125 transition-transform duration-300 ease-in-out">
+                <button  onClick={handleFilterButtonClick} className={`bg-blue-950 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center hover:scale-125 transition-transform duration-300 ease-in-out ${ !isAdvancedSearch && 'hidden' }`}>
                     <ImFilter className="fill-white" size={30} />
                 </button>
                 <button  onClick={() => setIsMapOpen(true)} className="bg-blue-950 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center hover:scale-125 transition-transform duration-300 ease-in-out">
@@ -248,4 +202,4 @@ const Explore = () => {
     )
 }
 
-export default Explore;
+export default ExploreBase;

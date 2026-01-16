@@ -11,10 +11,14 @@ export async function getRecommendedProfiles(request: Request, response: Respons
     const commonInterestsTreshold = request.body.commonInterestsTreshold;
     const accessToken = request.cookies['AccessToken'] as string;
     const { userId } = getUserIdFromJwtService(accessToken);
-    const filters: Filters = { fameRatingRange, ageRange, maxDistanceKm, commonInterestsTreshold };
+    const filters: Filters = { fameRatingRange, ageRange, maxDistanceKm };
 
     if (interests && interests.length) {
         filters.interests = interests;
+    }
+
+    if (commonInterestsTreshold) {
+        filters.commonInterestsTreshold = commonInterestsTreshold;
     }
 
     if (!userId) {

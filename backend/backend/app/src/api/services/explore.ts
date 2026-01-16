@@ -22,8 +22,8 @@ export async function getRecommendedProfilesService(userId: number, filters: Fil
 
         filteredIds = await filterAlreadyLikedProfiles(userId, filteredIds);
         if (filteredIds.length === 0) return [];
-
-        const interestsFilteredIds = await filterProfilesByInterests(userId, filteredIds, userInterests, 1);
+        const commonInterestsTreshold = filters.commonInterestsTreshold ?? userInterests.length;
+        const interestsFilteredIds = await filterProfilesByInterests(userId, filteredIds, userInterests, commonInterestsTreshold);
         if (interestsFilteredIds.length === 0) return [];
 
         const interestsFilteredIdsMap = new Map<number, [number, string[]]>(
@@ -97,7 +97,6 @@ async function filterProfilesByPersonalInfos(
             AND age BETWEEN $6 AND $7
             LIMIT 30;
         `;
-
         const profilesResult = await client.query(profilesQuery, [
             userId,
             sexualPreferences,

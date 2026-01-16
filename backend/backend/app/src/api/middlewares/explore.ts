@@ -25,7 +25,7 @@ export function validateRecommendedProfilesBody(request: Request, response: Resp
         return ;
     }
 
-    if (!commonInterestsTreshold || typeof commonInterestsTreshold !== 'number') {
+    if (commonInterestsTreshold && typeof commonInterestsTreshold !== 'number') {
         response.status(400).send( { msg: 'invalid commonInterestsTreshold field!' } );
         return ;
     }

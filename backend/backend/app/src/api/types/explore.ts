@@ -3,5 +3,5 @@ export type Filters = {
     ageRange: number[];
     interests?: string[];
     maxDistanceKm: number;
-    commonInterestsTreshold: number;
+    commonInterestsTreshold?: number;
 };

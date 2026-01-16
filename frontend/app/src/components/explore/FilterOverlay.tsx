@@ -210,6 +210,7 @@ function FilterOverlay({ handleFilterOverlayClose }: FilterOverlayProps) {
                 <option value="fame">Fame Rating</option>
                 <option value="age">Age</option>
                 <option value="distance">Distance</option>
+                <option value="interests">Interests</option>
             </select>
 
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">

@@ -1,1 +1,1 @@
-export type SortOption = "fame" | "age" | "distance" | null;
+export type SortOption = "fame" | "age" | "distance" | "interests" | null;

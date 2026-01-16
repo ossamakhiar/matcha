@@ -65,17 +65,17 @@ services:
     ports:
       - ${API_PORT}:${API_PORT}
 
-  frontend:
-    build: ./frontend
-    image: frontend
-    container_name: frontend
-    restart: on-failure
-    env_file:
-      - ./frontend/app/.env
-    depends_on:
-      - backend
-    ports:
-      - ${FRONTEND_PORT}:${FRONTEND_PORT}
+  # frontend:
+  #   build: ./frontend
+  #   image: frontend
+  #   container_name: frontend
+  #   restart: on-failure
+  #   env_file:
+  #     - ./frontend/app/.env
+  #   depends_on:
+  #     - backend
+  #   ports:
+  #     - ${FRONTEND_PORT}:${FRONTEND_PORT}
 
 networks:
   backend:

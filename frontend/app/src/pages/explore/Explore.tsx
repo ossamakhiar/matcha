@@ -100,6 +100,7 @@ const Explore = () => {
     let [isMapOpen, setIsMapOpen] = useState(false);
     let [fameRatingRange, setFameRatingRange] = useState([0, 5]);
     let [ageRange, setAgeRange] = useState([18, 30]);
+    let [maxDistanceKm, setMaxDistanceKm] = useState(500);
     let [interests, setInterests] = useState<Set<string>>();
     let [currIndex, setCurrIndex] = useState(0);
     let [recommendedProfiles, setRecommendedProfiles] = useState<RecommendedProfileInfos[]>();
@@ -113,7 +114,7 @@ const Explore = () => {
         setErrorOccurred(false);
         setNoResult(false);
         try {
-            const requestBody: {[key: string]: any} = { fameRatingRange, ageRange };
+            const requestBody: {[key: string]: any} = { fameRatingRange, ageRange, maxDistanceKm, commonInterestsTreshold: 1 };
 
             if (interests) {
                 requestBody['interests'] = [...interests];
@@ -121,6 +122,8 @@ const Explore = () => {
 
             console.log('AgeFilter: ' + requestBody.ageRange);
             console.log('FameRatingFilter: ' + requestBody.fameRatingRange);
+            console.log('maxDistanceKm: ' + requestBody.maxDistanceKm);
+            console.log('commonInterestsTreshold: ' + requestBody.commonInterestsTreshold);
 
             const responseBody = await sendLoggedInActionRequest('POST', import.meta.env.VITE_LOCAL_RECOMMENDED_PROFILES_API_URL, requestBody);
 
@@ -159,11 +162,12 @@ const Explore = () => {
         return ;
     }
 
-    function handleFilterOverlayClose(newFameRatingRange: number[], newAgeRange: number[], newInterests: Set<string>) {
+    function handleFilterOverlayClose(newFameRatingRange: number[], newAgeRange: number[], newInterests: Set<string>, newMaxDistanceKm: number) {
         setIsFilterOverlayOpen(false);
         setFameRatingRange(newFameRatingRange);
         setAgeRange(newAgeRange);
         setInterests(newInterests);
+        setMaxDistanceKm(newMaxDistanceKm);
     }
 
     function handleFilterButtonClick() {

@@ -13,8 +13,8 @@ export async function getRecommendedProfilesService(userId: number, filters: Fil
     // console.log('interests: ' + filters.interests);
     try {
         const userInterests = filters.interests ?? await getUserInterests(userId);
-        const profiles = await filterProfilesByPersonalInfos(userId, filters.fameRatingRange, filters.ageRange);
-
+        let profiles = await filterProfilesByPersonalInfos(userId, filters.fameRatingRange, filters.ageRange);
+        profiles = await filterProfilesByLocation(userId, profiles, filters.maxDistanceKm);
         // console.log('userInterests: ' + userInterests);
 
         let filteredIds = profiles.map(profile => Number(profile.id));
@@ -49,7 +49,6 @@ export async function getRecommendedProfilesService(userId: number, filters: Fil
         finalProfiles.forEach(profile => {
             profile.profilePhotos = profilePhotosMap.get(Number(profile.id)) || [];
         });
-        // sort the profiles
 
         finalProfiles = await filterBlockedUsers(userId, finalProfiles);
 
@@ -296,5 +295,71 @@ async function filterBlockedUsers(
         throw new Error('Failed to filter blocked users');
     } finally {
         client.release();
+    }
+}
+
+function degreesToRadians(deg: number): number {
+    return deg * (Math.PI / 180);
+}
+
+function calculateDistanceKm(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+): number {
+    const EARTH_RADIUS_KM = 6371;
+
+    const dLat = degreesToRadians(lat2 - lat1);
+    const dLon = degreesToRadians(lon2 - lon1);
+
+    const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(degreesToRadians(lat1)) *
+        Math.cos(degreesToRadians(lat2)) *
+        Math.sin(dLon / 2) ** 2;
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return EARTH_RADIUS_KM * c;
+}
+
+
+async function filterProfilesByLocation(
+    userId: number,
+    profiles: RecommendedProfileInfos[],
+    maxDistanceKm?: number
+): Promise<RecommendedProfileInfos[]> {
+    if (!maxDistanceKm) return profiles;
+
+    let client;
+
+    try {
+        client = await pool.connect();
+
+        const query = `
+            SELECT latitude, longitude
+            FROM "user"
+            WHERE id = $1
+        `;
+        const result = await client.query(query, [userId]);
+
+        if (result.rows.length === 0) return profiles;
+
+        const userLat = Number(result.rows[0].latitude);
+        const userLng = Number(result.rows[0].longitude);
+
+        return profiles.filter(profile => {
+            const distance = calculateDistanceKm(userLat, userLng, profile.latitude, profile.longitude);
+
+            return distance <= maxDistanceKm;
+        });
+    } catch (err) {
+        console.error("Error filtering profiles by location:", err);
+        return profiles;
+    } finally {
+        if (client) {
+            client.release();
+        }
     }
 }

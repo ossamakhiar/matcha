@@ -2,9 +2,10 @@ import { useState } from "react";
 import FameRatingFilter from "./FameRatingFilter";
 import InterestsInput from "../utils/InterestsInput";
 import AgeGapFilter from "./age-gap-filter/AgeGapFilter";
+import GeoLocationFilter from "./GeoLocationFilter";
 
 type FilterOverlayProps = {
-    handleFilterOverlayClose: (fameRatingRange: number[], ageRange: number[], interests: Set<string>) => void;
+    handleFilterOverlayClose: (fameRatingRange: number[], ageRange: number[], interests: Set<string>, maxDistanceKm: number) => void;
 };
 
 function FilterOverlay({handleFilterOverlayClose}: FilterOverlayProps) {
@@ -13,16 +14,17 @@ function FilterOverlay({handleFilterOverlayClose}: FilterOverlayProps) {
     let [minAge, setMinAge] = useState(18);
     let [maxAge, setMaxAge] = useState(30);
     let [selectedInterests, setSelectedInterests] = useState<Set<string>>(new Set([]));
+    let [maxDistanceKm, setMaxDistanceKm] = useState(500);
 
     function handleBackgroundClick(e: React.MouseEvent<HTMLDivElement>) {
         const classes = (e.target as HTMLElement).classList;
         if (classes.contains('bg-black') && classes.contains('bg-opacity-40')) {
-            handleFilterOverlayClose([minFameRating, maxFameRating], [minAge, maxAge], selectedInterests);
+            handleFilterOverlayClose([minFameRating, maxFameRating], [minAge, maxAge], selectedInterests, maxDistanceKm);
         }
     }
 
     function handleClose() {
-        handleFilterOverlayClose([minFameRating, maxFameRating], [minAge, maxAge], selectedInterests);
+        handleFilterOverlayClose([minFameRating, maxFameRating], [minAge, maxAge], selectedInterests, maxDistanceKm);
     }
 
     // function handleSubmit() {
@@ -45,6 +47,10 @@ function FilterOverlay({handleFilterOverlayClose}: FilterOverlayProps) {
         setMinAge(newMinAge);
         setMaxAge(newMaxAge);
     }
+
+    function handleGeoLocationFilterApply(distanceKm: number) {
+        setMaxDistanceKm(distanceKm);
+    }    
 
     return (
         <div onClick={handleBackgroundClick} className="fixed z-30 flex justify-center items-center inset-0 bg-black bg-opacity-40">
@@ -75,6 +81,10 @@ function FilterOverlay({handleFilterOverlayClose}: FilterOverlayProps) {
                     <div>
                         <h3 style={{fontSize: 23, fontWeight: 'bold'}} className="mb-4">Filter by Age:</h3>
                         <AgeGapFilter initialMinAge={minAge} initialMaxAge={maxAge} handleAgeGapFilterApply={handleAgeGapFilterApply}/>
+                    </div>
+                    <div>
+                        <h3 style={{fontSize: 23, fontWeight: 'bold'}} className="mb-4">Filter by Distance:</h3>
+                        <GeoLocationFilter initialMaxDistanceKm={maxDistanceKm} handleGeoLocationFilterApply={handleGeoLocationFilterApply}/>
                     </div>
                 </div>
             </div>

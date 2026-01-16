@@ -7,9 +7,11 @@ export async function getRecommendedProfiles(request: Request, response: Respons
     const fameRatingRange = request.body.fameRatingRange;
     const ageRange = request.body.ageRange;
     const interests = request.body.interests;
+    const maxDistanceKm = request.body.maxDistanceKm;
+    const commonInterestsTreshold = request.body.commonInterestsTreshold;
     const accessToken = request.cookies['AccessToken'] as string;
     const { userId } = getUserIdFromJwtService(accessToken);
-    const filters: Filters = { fameRatingRange, ageRange };
+    const filters: Filters = { fameRatingRange, ageRange, maxDistanceKm, commonInterestsTreshold };
 
     if (interests && interests.length) {
         filters.interests = interests;

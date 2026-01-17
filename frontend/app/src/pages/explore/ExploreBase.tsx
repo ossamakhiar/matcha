@@ -5,9 +5,9 @@ import { TbGenderAndrogyne, TbGenderFemme, TbGenderMale } from "react-icons/tb"
 import interests from "../../utils/interests"
 import FameRatingDisplay from "../../components/utils/FameRatingDisplay"
 import { BioAndInterestsProps, MatchedUserSummaryProps } from "./types"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import FilterOverlay from "../../components/explore/FilterOverlay"
-import { RecommendedProfileInfos } from "../../types/profile"
+import { RecommendedProfileInfo } from "../../types/profile"
 import { sendLoggedInActionRequest } from "../../utils/httpRequests"
 import NoResult from "../../components/utils/no-results/NoResults"
 import ErrorOccurred from "../../components/utils/error-occurred/ErrorOccurred"
@@ -27,8 +27,8 @@ const   MatchedUserSummary = ({firstName, lastName, fameRating, age, gender}: Ma
                 <GrMapLocation className="stroke-sky-300" size={20}/>
                 {/* <h2 className="text-lg lg:text-xl text-sky-300 font-semibold whitespace-nowrap">6 Km, Morroco</h2> */}
                 <span className="px-2 bg-sky-950 flex items-center gap-1 w-max text-white font-semibold rounded-full">
-                    {gender == 'male' ? <TbGenderMale size={20} />
-                    : gender == 'female' ? <TbGenderFemme size={20}/>
+                    {gender === 'male' ? <TbGenderMale size={20} />
+                    : gender === 'female' ? <TbGenderFemme size={20}/>
                     : <TbGenderAndrogyne />}
                    {age}
                 </span>
@@ -51,7 +51,7 @@ function BioAndInterests({biography, userInterests}: BioAndInterestsProps) {
                     {
                         interests.map(
                             (interest, index) => (
-                                <div key={`Interest-${index + 1}`} className={`flex justify-center tag cursor-pointer max-w-32 fit-box ${userInterests.has(interest) ? 'bg-button-pink' : ''}`}>
+                                <div key={`Interest-${index + 1}`} className={`flex justify-center tag cursor-pointer max-w-32 fit-box ${userInterests?.has(interest) ? 'bg-button-pink' : ''}`}>
                                     <h3>#{interest}</h3>
                                 </div>
                             )
@@ -63,25 +63,25 @@ function BioAndInterests({biography, userInterests}: BioAndInterestsProps) {
     )
 }
 
-const   MatchedProfile = ({ profileInfos }: { profileInfos: RecommendedProfileInfos }) => {
+const   MatchedProfile = ({ profileInfo }: { profileInfo: RecommendedProfileInfo }) => {
 
     return (
         <div className="flex flex-row gap-10 w-full h-full max-h-full md:max-h-screen w-full pb-20 md:w-11/12 lg:w-9/12 2xl:w-8/12">
             <div className="md:w-1/2 md:overflow-y-auto md:scrollbar overflow-x-hidden">
                 <div className="relative aspect-[2/3] mb-10 pr-1 md:pr-4 pt-1 md:pt-3">
-                    <Link to={`/profile/${profileInfos.id}`}><img src={profileInfos.profilePicture} className="w-full h-full object-cover rounded-2xl shadow-lg shadow-blue-500" /></Link>
+                    <Link to={`/profile/${profileInfo.id}`}><img src={profileInfo.profilePicture} className="w-full h-full object-cover rounded-2xl shadow-lg shadow-blue-500" /></Link>
                     <div className="absolute bottom-4 left-7 w-[50%]">
-                        <MatchedUserSummary id={profileInfos.id} firstName={profileInfos.firstName} lastName={profileInfos.lastName} age={profileInfos.age} fameRating={profileInfos.fameRating} gender={profileInfos.gender}/>
+                        <MatchedUserSummary id={profileInfo.id} firstName={profileInfo.firstName} lastName={profileInfo.lastName} age={profileInfo.age} fameRating={profileInfo.fameRating} gender={profileInfo.gender}/>
                     </div>
                 </div>
                 <div className="md:hidden md:w-1/2 overflow-x-hidden overflow-y-hidden md:overflow-y-auto md:scrollbar mb-10">
-                    <BioAndInterests biography={profileInfos.biography} userInterests={profileInfos.profileInterests}/>
+                    <BioAndInterests biography={profileInfo.biography} userInterests={profileInfo.profileInterests}/>
                 </div>
                 <h2 style={{fontSize: 30, fontWeight: 'semi-bold'}} className="risque-regular pt-6 pl-2 sm:pl-6 pb-6">Photos</h2>
                 {
-                    profileInfos && profileInfos.profilePhotos && profileInfos.profilePhotos.length > 0 ?
-                    profileInfos.profilePhotos.map((pictureURL) => (
-                        <div className="relative aspect-[2/3] overflow-y-auto scrollbar overflow-x-hidden mb-6 pr-4" key={pictureURL}>
+                    profileInfo && profileInfo.profilePhotos && profileInfo.profilePhotos.length > 0 ?
+                    profileInfo.profilePhotos.map((pictureURL, index) => (
+                        <div className="relative aspect-[2/3] overflow-y-auto scrollbar overflow-x-hidden mb-6 pr-4" key={`${pictureURL}-${index}`}>
                             <img src={pictureURL} className="w-full h-full object-cover rounded-2xl shadow-lg shadow-blue-500" />
                         </div>
                     )) : null
@@ -89,16 +89,15 @@ const   MatchedProfile = ({ profileInfos }: { profileInfos: RecommendedProfileIn
             </div>
 
             <div className="md:w-1/2 md:overflow-y-auto md:scrollbar overflow-x-hidden hidden md:inline-flex">
-                <BioAndInterests biography={profileInfos.biography} userInterests={profileInfos.profileInterests}/>
+                <BioAndInterests biography={profileInfo.biography} userInterests={profileInfo.profileInterests}/>
             </div>
         </div>
     )
 }
 
 type ExploreBaseProps = {
-    recommendedProfiles: RecommendedProfileInfos[];
-    isAdvancedSearch: Boolean;
-    fetchProfiles: () => void;
+    recommendedProfiles: RecommendedProfileInfo[];
+    isAdvancedSearch: boolean;
     updateFiltersAndSortBy?: (
         newFameRatingRange: number[],
         newAgeRange: number[],
@@ -108,14 +107,18 @@ type ExploreBaseProps = {
     ) => void;
 };
 
-const ExploreBase = ( { recommendedProfiles, isAdvancedSearch, fetchProfiles, updateFiltersAndSortBy }: ExploreBaseProps ) => {
+const ExploreBase = ( { recommendedProfiles, isAdvancedSearch, updateFiltersAndSortBy }: ExploreBaseProps ) => {
     let [isFilterOverlayOpen, setIsFilterOverlayOpen] = useState(false);
     let [isMapOpen, setIsMapOpen] = useState(false);
     let [currIndex, setCurrIndex] = useState(0);
     let [errorOccurred, setErrorOccurred] = useState(false);
-    const noResult = recommendedProfiles.length == 0;
-
+    const noResult = recommendedProfiles.length === 0;
     let navigate = useNavigate();
+
+    // reset the index whenever recommendedProfiles changes
+    useEffect(() => {
+        setCurrIndex(0);
+    }, [recommendedProfiles]);
 
     function handleFilterOverlayClose(newFameRatingRange: number[], newAgeRange: number[], newInterests: Set<string>, newMaxDistanceKm: number, newSortBy: SortOption) {
         setIsFilterOverlayOpen(false);
@@ -129,12 +132,8 @@ const ExploreBase = ( { recommendedProfiles, isAdvancedSearch, fetchProfiles, up
     }
 
     function handleRightArrowClick() {
-        if (!recommendedProfiles) {
-            return ;
-        }
-
         if (currIndex === recommendedProfiles.length - 1) {
-            fetchProfiles();
+            setCurrIndex(0);
             return ;
         }
 
@@ -142,10 +141,6 @@ const ExploreBase = ( { recommendedProfiles, isAdvancedSearch, fetchProfiles, up
     }
 
     function handleLeftArrowClick() {
-        if (!recommendedProfiles) {
-            return ;
-        }
-
         if (currIndex == 0) {
             setCurrIndex(recommendedProfiles.length - 1);
             return ;
@@ -155,10 +150,9 @@ const ExploreBase = ( { recommendedProfiles, isAdvancedSearch, fetchProfiles, up
     }
 
     async function handleLikeButtonClick() {
-        if (!recommendedProfiles) {
+        if (recommendedProfiles.length == 0) {
             return ;
         }
-
         try {
             await sendLoggedInActionRequest('POST', import.meta.env.VITE_LOCAL_PROFILE_LIKE_API_URL + `/${recommendedProfiles[currIndex].id}`);
             setTimeout(() => {
@@ -174,15 +168,15 @@ const ExploreBase = ( { recommendedProfiles, isAdvancedSearch, fetchProfiles, up
         <div className="flex justify-center w-screen pl-4 pr-4 md:pl-6 md:pr-6 lg:pl-10 lg:pr-10 xl:pl-32 xl:pr-32 2xl:pl-44 2xl:pr-44">
             { noResult && <NoResult />}
             { errorOccurred && <ErrorOccurred />}
-            <div className={(!isAdvancedSearch || isFilterOverlayOpen == false || errorOccurred) ? 'hidden' : ''}>
+            <div className={(!isAdvancedSearch || !isFilterOverlayOpen || errorOccurred) ? 'hidden' : ''}>
                 <FilterOverlay handleFilterOverlayClose={handleFilterOverlayClose}/>
             </div>
             <div className={`pt-4 flex justify-center md:pt-6 w-screen ${errorOccurred || noResult ? 'hidden' : ''}`}>
-                {recommendedProfiles && recommendedProfiles.length > 0 && <MatchedProfile profileInfos={recommendedProfiles[currIndex]}/>}
+                {recommendedProfiles.length > 0 && <MatchedProfile profileInfo={recommendedProfiles[currIndex]}/>}
             </div>
             <div className="fixed z-20 pb-4 bottom-1 flex justify-center gap-2 sm:gap-4">
-                <button className="bg-blue-950 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center hover:scale-125 transition-transform duration-300 ease-in-out">
-                    <FaArrowLeft onClick={handleLeftArrowClick} className="fill-white" size={34} />
+                <button onClick={handleLeftArrowClick} className="bg-blue-950 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center hover:scale-125 transition-transform duration-300 ease-in-out">
+                    <FaArrowLeft className="fill-white" size={34} />
                 </button>
                 <button  onClick={handleFilterButtonClick} className={`bg-blue-950 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center hover:scale-125 transition-transform duration-300 ease-in-out ${ !isAdvancedSearch && 'hidden' }`}>
                     <ImFilter className="fill-white" size={30} />
@@ -190,14 +184,14 @@ const ExploreBase = ( { recommendedProfiles, isAdvancedSearch, fetchProfiles, up
                 <button  onClick={() => setIsMapOpen(true)} className="bg-blue-950 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center hover:scale-125 transition-transform duration-300 ease-in-out">
                     <FaMap className="fill-white" size={30} />
                 </button>
-                <button className="bg-blue-950 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center hover:scale-125 transition-transform duration-300 ease-in-out">
-                    <FaHeart onClick={handleLikeButtonClick} className="fill-white" size={30} />
+                <button onClick={handleLikeButtonClick} className="bg-blue-950 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center hover:scale-125 transition-transform duration-300 ease-in-out">
+                    <FaHeart className="fill-white" size={30} />
                 </button>
-                <button className="bg-blue-950 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center hover:scale-125 transition-transform duration-300 ease-in-out">
-                    <FaArrowRight onClick={handleRightArrowClick} className="fill-white" size={34} />
+                <button onClick={handleRightArrowClick} className="bg-blue-950 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center hover:scale-125 transition-transform duration-300 ease-in-out">
+                    <FaArrowRight className="fill-white" size={34} />
                 </button>
             </div>
-            {isMapOpen && <InteractiveMap onClose={() => setIsMapOpen(false)} recommendedProfiles={recommendedProfiles ?? []} />}
+            {isMapOpen && <InteractiveMap onClose={() => setIsMapOpen(false)} recommendedProfiles={recommendedProfiles} />}
         </div>
     )
 }

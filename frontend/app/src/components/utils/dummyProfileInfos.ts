@@ -1,8 +1,8 @@
-import { ProfileInfos } from "../../types/profile";
+import { ProfileInfo } from "../../types/profile";
 
-export let dummyProfileInfos: ProfileInfos[] = [
+export let dummyProfileInfo: ProfileInfo[] = [
     {
-        userInfos: {
+        userInfo: {
             id: '1',
             isSelf: true,
             isLiked:false,
@@ -23,7 +23,7 @@ export let dummyProfileInfos: ProfileInfos[] = [
         userPhotos: [],
     },
     {
-        userInfos: {
+        userInfo: {
             id: '2',
             isSelf: false,
             isLiked:true,
@@ -44,7 +44,7 @@ export let dummyProfileInfos: ProfileInfos[] = [
         userPhotos: [],
     },
     {
-        userInfos: {
+        userInfo: {
             id: '3',
             isSelf: true,
             isLiked:true,
@@ -66,4 +66,4 @@ export let dummyProfileInfos: ProfileInfos[] = [
     },
 ];
 
-export default dummyProfileInfos;
+export default dummyProfileInfo;

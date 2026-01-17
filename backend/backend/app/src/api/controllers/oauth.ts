@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import dotenv from 'dotenv'
-import { setCSRFcookies, setCompleteProfileInfosCookie, setJwtTokensAsHttpOnlyCookies } from '../utils/cookies.js';
+import { setCSRFcookies, setCompleteProfileInfoCookie, setJwtTokensAsHttpOnlyCookies } from '../utils/cookies.js';
 import { isProfileComplete } from '../services/oauth.js';
 
 dotenv.config();
@@ -18,7 +18,7 @@ export async function discordCallbackController(request: Request, response: Resp
 
         // set profile as already complete
         if (is_profile_complete) {
-            setCompleteProfileInfosCookie(3, response);
+            setCompleteProfileInfoCookie(3, response);
         }
     }
 

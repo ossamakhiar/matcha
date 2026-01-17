@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react"
-import { RecommendedProfileInfos } from "../../types/profile"
+import { RecommendedProfileInfo } from "../../types/profile"
 import { sendLoggedInActionRequest } from "../../utils/httpRequests"
 import { isOfBackendRecommendedProfileType } from "../../utils/typeGuards"
 import ExploreBase from "./ExploreBase"
 import ErrorOccurred from "../../components/utils/error-occurred/ErrorOccurred"
 
 const Recommendation = () => {
-    let [recommendedProfiles, setRecommendedProfiles] = useState<RecommendedProfileInfos[]>();
+    let [recommendedProfiles, setRecommendedProfiles] = useState<RecommendedProfileInfo[]>();
     let [isLoading, setIsLoading] = useState(true);
     let [errorOccurred, setErrorOccurred] = useState(false);
 
@@ -61,7 +61,7 @@ const Recommendation = () => {
     }
 
     return (
-        <ExploreBase recommendedProfiles={recommendedProfiles ?? []} isAdvancedSearch={false} fetchProfiles={fetchProfiles} />
+        <ExploreBase recommendedProfiles={recommendedProfiles ?? []} isAdvancedSearch={false} />
     )
 }
 

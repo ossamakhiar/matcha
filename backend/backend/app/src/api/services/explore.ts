@@ -1,19 +1,19 @@
 import pool from "../model/pgPoolConfig.js";
 import { Filters } from "../types/explore.js";
-import { RecommendedProfileInfos } from "../types/profile.js";
+import { RecommendedProfileInfo } from "../types/profile.js";
 import { getMatchingSexualOrientation, getOppositeGenders } from "../utils/explore.js";
 import dotenv from 'dotenv'
 import { getUserInterests } from "./profile.js";
 
 dotenv.config();
 
-export async function getRecommendedProfilesService(userId: number, filters: Filters): Promise<RecommendedProfileInfos[]> {
+export async function getRecommendedProfilesService(userId: number, filters: Filters): Promise<RecommendedProfileInfo[]> {
     // console.log('AgeFilter: ' + filters.ageRange);
     // console.log('FameRatingFitler: ' + filters.fameRatingRange);
     // console.log('interests: ' + filters.interests);
     try {
         const userInterests = filters.interests ?? await getUserInterests(userId);
-        let profiles = await filterProfilesByPersonalInfos(userId, filters.fameRatingRange, filters.ageRange);
+        let profiles = await filterProfilesByPersonalInfo(userId, filters.fameRatingRange, filters.ageRange);
         profiles = await filterProfilesByLocation(userId, profiles, filters.maxDistanceKm);
         // console.log('userInterests: ' + userInterests);
 
@@ -59,11 +59,11 @@ export async function getRecommendedProfilesService(userId: number, filters: Fil
     }
 }
 
-async function filterProfilesByPersonalInfos(
+async function filterProfilesByPersonalInfo(
     userId: number,
     fameRatingRange: number[],
     ageRange: number[]
-): Promise<RecommendedProfileInfos[]> {
+): Promise<RecommendedProfileInfo[]> {
     let client;
 
     try {
@@ -266,8 +266,8 @@ async function getProfilesPhotos(userIds: number[]): Promise<{ userId: number, p
 
 async function filterBlockedUsers(
     userId: number,
-    profiles: RecommendedProfileInfos[]
-): Promise<RecommendedProfileInfos[]> {
+    profiles: RecommendedProfileInfo[]
+): Promise<RecommendedProfileInfo[]> {
     const client = await pool.connect();
 
     try {
@@ -326,9 +326,9 @@ function calculateDistanceKm(
 
 async function filterProfilesByLocation(
     userId: number,
-    profiles: RecommendedProfileInfos[],
+    profiles: RecommendedProfileInfo[],
     maxDistanceKm?: number
-): Promise<RecommendedProfileInfos[]> {
+): Promise<RecommendedProfileInfo[]> {
     if (!maxDistanceKm) return profiles;
 
     let client;

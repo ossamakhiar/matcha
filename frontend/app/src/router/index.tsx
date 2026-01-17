@@ -50,26 +50,17 @@ const router = createBrowserRouter([
     },
     {
       path: '/complete-info',
-      
-      element: <SetupLayout><CompleteInfo /></SetupLayout>,
+      element: <SetupLayout />,
       children: [
         {
-          path: '1',
-          element: <PersonalInfo />,
-        },
-        {
-          path: '2',
-          element: <InterestTag />,
-        },
-        {
-          path: '3',
-          element: <ProfileSetup />,
-        },
-        {
-          path: '*',
-          element: <div>404 Not Found -_-</div>,
-        },
-      ],
+          element: <CompleteInfo />,
+          children: [
+            { path: '1', element: <PersonalInfo /> },
+            { path: '2', element: <InterestTag /> },
+            { path: '3', element: <ProfileSetup /> },
+          ]
+        }
+      ]
     },    
     {
       path: '/explore',

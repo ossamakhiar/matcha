@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import { sendFormDataRequest, sendLoggedInGetRequest } from "../../utils/httpRequests";
-import { getFormError, isOfBriefProfileInfosType } from "../../utils/typeGuards";
-import { BriefProfileInfos } from "../../types/profile";
+import { getFormError, isOfBriefProfileInfoType } from "../../utils/typeGuards";
+import { BriefProfileInfo } from "../../types/profile";
 import { getCookie } from "../../utils/generalPurpose";
 import ErrorOccurred from "../../components/utils/error-occurred/ErrorOccurred";
 
@@ -41,7 +41,7 @@ type FormValues = {
 
 const PersonalInfo = () => {
     const [image, setImage] = useState<File>();
-    const [defaultProfileInfos, setDefaultProfileInfos] = useState<BriefProfileInfos>();
+    const [defaultProfileInfo, setDefaultProfileInfo] = useState<BriefProfileInfo>();
     const [errorOccurred, setErrorOccurred] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -62,31 +62,34 @@ const PersonalInfo = () => {
         }
         // console.log('completeProfileCookie: ' + completeProfileCookie);
 
-        (async function fetchDefaultPersonalInfos() {
+        (async function fetchDefaultPersonalInfo() {
             try {
-                const responseBody = await sendLoggedInGetRequest(import.meta.env.VITE_LOCAL_CURR_USER_BRIEF_INFOS_API_URL);
-
-                setIsLoading(false);
-
-                if (!responseBody || !isOfBriefProfileInfosType(responseBody.profileInfos)) {
+                const responseBody = await sendLoggedInGetRequest(import.meta.env.VITE_LOCAL_CURR_USER_BRIEF_INFO_API_URL);
+                console.log(responseBody);
+                if (!responseBody || !isOfBriefProfileInfoType(responseBody.profileInfo)) {
+                    console.log('HERE1');
                     setErrorOccurred(true);
+                    setIsLoading(false);
                     return ;
                 }
+                console.log('HERE2');
 
-                setDefaultProfileInfos(responseBody.profileInfos);
+                setDefaultProfileInfo(responseBody.profileInfo);
+                setIsLoading(false);
             }
             catch (err) {
                 console.log(err);
+                setIsLoading(false);
             }
         })();
     }, [])
 
     if (isLoading) {
-        return ;
+        return (null);
     }
 
-    if (!defaultProfileInfos) {
-        return ;
+    if (!defaultProfileInfo) {
+        return (null);
     }
 
     if (errorOccurred) {
@@ -148,7 +151,7 @@ const PersonalInfo = () => {
         // console.log(...formData);
 
         try {
-            await sendFormDataRequest('POST', import.meta.env.VITE_LOCAL_COMPLETE_PERSONAL_INFOS_API_URL as string, formData);
+            await sendFormDataRequest('POST', import.meta.env.VITE_LOCAL_COMPLETE_PERSONAL_INFO_API_URL as string, formData);
 
             // pass to next complete-info page
             setTimeout(() => {
@@ -189,13 +192,13 @@ const PersonalInfo = () => {
 
             <Formik
                 initialValues={{
-                    firstname: defaultProfileInfos.firstName,
-                    lastname: defaultProfileInfos.lastName,
-                    username: defaultProfileInfos.userName,
-                    age: defaultProfileInfos.age,
-                    biography: defaultProfileInfos.biography,
-                    gender: defaultProfileInfos.gender,
-                    sexualPreference: defaultProfileInfos.sexualPreferences,
+                    firstname: defaultProfileInfo.firstName,
+                    lastname: defaultProfileInfo.lastName,
+                    username: defaultProfileInfo.userName,
+                    age: defaultProfileInfo.age,
+                    biography: defaultProfileInfo.biography,
+                    gender: defaultProfileInfo.gender,
+                    sexualPreference: defaultProfileInfo.sexualPreferences,
                 }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}

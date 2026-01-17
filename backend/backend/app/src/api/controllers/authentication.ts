@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { clearAllCookies, setCSRFcookies, setCompleteProfileInfosCookie, setJwtTokensAsHttpOnlyCookies } from '../utils/cookies.js';
+import { clearAllCookies, setCSRFcookies, setCompleteProfileInfoCookie, setJwtTokensAsHttpOnlyCookies } from '../utils/cookies.js';
 import { changePasswordService, emailValidationService, loginVerificationService, saveResetPasswordTokenService } from '../services/authentication.js';
 import { generateRandomTokenService } from '../services/hashing.js';
 import { sendForgetPasswordEmailService } from '../services/mailService.js';
@@ -23,7 +23,7 @@ export async function localStrategyController(request: Request, response: Respon
 
         // set profile as already complete
         if (is_profile_complete) {
-            setCompleteProfileInfosCookie(3, response);
+            setCompleteProfileInfoCookie(3, response);
         }
 
         // set CSRF cookies to mitigate CSRF attacks

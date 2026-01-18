@@ -56,7 +56,7 @@ export async function checkIfAlreadyCompleted(request: Request, response: Respon
     const completeInfoCookie = request.cookies['CompleteProfile'];
 
     if (completeInfoCookie && completeInfoCookie === 3) {
-        response.status(403).send( { url: process.env.FRONTENT_PROFILE_URL } );
+        response.status(403).send( { url: process.env.FRONTEND_PROFILE_URL } );
         return ;
     }
 

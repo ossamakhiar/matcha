@@ -1,22 +1,23 @@
 import { Request, Response } from 'express'
-import { getUserIdFromJwtService } from "../services/jwt.js";
 import { addUserInterestsService } from '../services/profile.js';
 import { addUserPhotosService, setProfileAsCompleteService, updatePersonalInfoService } from '../services/complete-profile.js';
 import dotenv from 'dotenv'
 import { setCompleteProfileInfoCookie } from '../utils/cookies.js';
 import { isArray } from '../validators/generalPurpose.js';
+import { CompleteProfileNextStep } from '../types/enums.js';
 
 dotenv.config();
 
 export async function completeInterestsController(request: Request, response: Response) {
-    const completeInfoCookie = request.cookies['CompleteProfile'];
+    const completeInfoCookie = Number(request.cookies['CompleteProfile']);
 
-    if (completeInfoCookie != 1) {
-        let redirectUrl = process.env.FRONTENT_PROFILE_URL;
+    if (completeInfoCookie != CompleteProfileNextStep.INTERESTS_NEXT) {
+        let redirectUrl = process.env.FRONTEND_PROFILE_URL
+;
 
         if (completeInfoCookie == undefined) {
-            redirectUrl = process.env.FRONTENT_COMPLETE_PROFILE_INFO_URL;
-        } else if (completeInfoCookie == 2) {
+            redirectUrl = process.env.FRONTEND_COMPLETE_PROFILE_INFO_URL;
+        } else if (completeInfoCookie == CompleteProfileNextStep.PHOTOS_NEXT) {
             redirectUrl = process.env.FRONTEND_COMPLETE_PHOTOS_URL;
         }
 
@@ -24,8 +25,8 @@ export async function completeInterestsController(request: Request, response: Re
         return ;
     }
 
-    const accessToken = request.cookies['AccessToken'] as string;
-    const { userId } = getUserIdFromJwtService(accessToken);
+    const userId = request.user.id;
+
     const { interests } = request.body;
 
     if (!isArray(interests, undefined, 'string')) {
@@ -33,11 +34,9 @@ export async function completeInterestsController(request: Request, response: Re
         return ;
     }
 
-    // console.log(`fine: ${interests}`);
-
     try {
-        await addUserInterestsService(userId as number, interests);
-        setCompleteProfileInfoCookie(2, response);
+        await addUserInterestsService(userId, interests);
+        setCompleteProfileInfoCookie(CompleteProfileNextStep.PHOTOS_NEXT, response);
         response.sendStatus(200);
     }
     catch (err) {
@@ -46,15 +45,17 @@ export async function completeInterestsController(request: Request, response: Re
 }
 
 export async function completePhotosController(request: Request, response: Response) {
-    const completeInfoCookie = request.cookies['CompleteProfile'];
+    const completeInfoCookie = Number(request.cookies['CompleteProfile']);
 
-    if (completeInfoCookie != 2) {
-        let redirectUrl = process.env.FRONTENT_PROFILE_URL;
+
+    if (completeInfoCookie != CompleteProfileNextStep.PHOTOS_NEXT) {
+        let redirectUrl = process.env.FRONTEND_PROFILE_URL
+;
 
         if (completeInfoCookie == undefined) {
-            redirectUrl = process.env.FRONTENT_COMPLETE_PROFILE_INFO_URL;
-        } else if (completeInfoCookie == 1) {
-            redirectUrl = process.env.FRONTEND_COPMPLETE_INTERESTS_URL;
+            redirectUrl = process.env.FRONTEND_COMPLETE_PROFILE_INFO_URL;
+        } else if (completeInfoCookie == CompleteProfileNextStep.INTERESTS_NEXT) {
+            redirectUrl = process.env.FRONTEND_COMPLETE_INTERESTS_URL;
         }
 
         response.status(403).send( { url: redirectUrl } );
@@ -64,18 +65,17 @@ export async function completePhotosController(request: Request, response: Respo
     try {
         const files = request.files as Express.Multer.File[];
 
-        if (!files) {
+        if (!files || files.length === 0) {
             response.status(400).send( { msg: 'upload error' } );
             return ;
         }
 
-        const accessToken = request.cookies['AccessToken'] as string;
-        const { userId } = getUserIdFromJwtService(accessToken);
+        const userId = request.user.id;
         const photosPaths: string[] = files.map(file => file.path);
 
-        await addUserPhotosService(userId as number, photosPaths);
-        await setProfileAsCompleteService(userId as number);
-        setCompleteProfileInfoCookie(3, response);
+        await addUserPhotosService(userId, photosPaths);
+        await setProfileAsCompleteService(userId);
+        setCompleteProfileInfoCookie(CompleteProfileNextStep.DONE, response);
         response.status(200).send({ message: 'Files uploaded successfully', files });
     } catch (error) {
         response.status(500).send({ message: 'Error uploading files' });
@@ -83,14 +83,15 @@ export async function completePhotosController(request: Request, response: Respo
 }
 
 export async function completePersonalInfoController(request: Request, response: Response) {
-    const completeInfoCookie = request.cookies['CompleteProfile'];
+    const completeInfoCookie = Number(request.cookies['CompleteProfile']);
 
     if (completeInfoCookie) {
-        let redirectUrl = process.env.FRONTENT_PROFILE_URL;
+        let redirectUrl = process.env.FRONTEND_PROFILE_URL
+;
 
-        if (completeInfoCookie == 1) {
-            redirectUrl = process.env.FRONTEND_COPMPLETE_INTERESTS_URL;
-        } else if (completeInfoCookie == 2) {
+        if (completeInfoCookie == CompleteProfileNextStep.INTERESTS_NEXT) {
+            redirectUrl = process.env.FRONTEND_COMPLETE_INTERESTS_URL;
+        } else if (completeInfoCookie == CompleteProfileNextStep.PHOTOS_NEXT) {
             redirectUrl = process.env.FRONTEND_COMPLETE_PHOTOS_URL;
         }
 
@@ -108,8 +109,8 @@ export async function completePersonalInfoController(request: Request, response:
     const gender = request.body.gender as string;
     const biography = request.body.biography as string;
     const sexualPreference = request.body.sexualPreference as string;
-    const accessToken = request.cookies['AccessToken'] as string;
-    const { userId } = getUserIdFromJwtService(accessToken);
+    const userId = request.user.id;
+
 
     if (file) {
         profilePicturePath = file.path;
@@ -117,9 +118,9 @@ export async function completePersonalInfoController(request: Request, response:
 
     try {
         const personalInfo = {profilePicturePath, username, firstname, lastname, age, gender, biography, sexualPreference}
-        await updatePersonalInfoService(userId as number, personalInfo);
+        await updatePersonalInfoService(userId, personalInfo);
 
-        setCompleteProfileInfoCookie(1, response);
+        setCompleteProfileInfoCookie(CompleteProfileNextStep.INTERESTS_NEXT, response);
         response.status(201).send( { msg: 'personal info completed!' } );
     }
 

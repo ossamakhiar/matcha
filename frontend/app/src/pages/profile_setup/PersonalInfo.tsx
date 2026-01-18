@@ -8,6 +8,7 @@ import { getFormError, isOfBriefProfileInfoType } from "../../utils/typeGuards";
 import { BriefProfileInfo } from "../../types/profile";
 import { getCookie } from "../../utils/generalPurpose";
 import ErrorOccurred from "../../components/utils/error-occurred/ErrorOccurred";
+import { CompleteProfileNextStep } from "../../types/enums";
 
 type SelectOptions = {
     value: string;
@@ -51,8 +52,8 @@ const PersonalInfo = () => {
         const completeProfileCookie = getCookie('CompleteProfile');
 
         if (completeProfileCookie) {
-            const navRoute = completeProfileCookie == '1' ? '/complete-info/2'
-                : completeProfileCookie == '2' ? '/complete-info/3' : '/profile'
+            const navRoute = completeProfileCookie == CompleteProfileNextStep.INTERESTS_NEXT ? '/complete-info/2'
+                : completeProfileCookie == CompleteProfileNextStep.PHOTOS_NEXT ? '/complete-info/3' : '/profile'
 
             setTimeout(() => {
                 navigate(navRoute);
@@ -60,7 +61,6 @@ const PersonalInfo = () => {
 
             return ;
         }
-        // console.log('completeProfileCookie: ' + completeProfileCookie);
 
         (async function fetchDefaultPersonalInfo() {
             try {
@@ -94,9 +94,7 @@ const PersonalInfo = () => {
 
     if (errorOccurred) {
         return (
-            <>
-                <ErrorOccurred />
-            </>
+            <ErrorOccurred />
         )
     }
 

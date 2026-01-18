@@ -7,6 +7,7 @@ type Props = {
 }
 
 import { Navigate } from "react-router-dom";
+import { CompleteProfileNextStep } from "../types/enums";
 
 const GuestLayout: FC<Props> = ({children}) =>  {
     const csrfClientExposedCookie = getCookie('csrfClientExposedCookie');
@@ -14,7 +15,7 @@ const GuestLayout: FC<Props> = ({children}) =>  {
     if (csrfClientExposedCookie) {
         const completeProfileCookie = getCookie('CompleteProfile');
 
-        if (completeProfileCookie != '3') {
+        if (completeProfileCookie != CompleteProfileNextStep.DONE) {
             return <Navigate to="/complete-info/1" replace />;
         }
 

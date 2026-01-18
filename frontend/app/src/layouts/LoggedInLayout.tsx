@@ -6,6 +6,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { sendGetRequestWithoutCreds, sendLoggedInActionRequest } from "../utils/httpRequests";
 import UserInfoProvider from "../context/UserProvider";
 import { isOfCoordsType } from "../utils/typeGuards";
+import { CompleteProfileNextStep } from "../types/enums";
 
 type Props = {
     children?: ReactNode;
@@ -76,7 +77,7 @@ const LoggedInLayout: FC<Props> = ({children}) =>  {
 
         const completeProfileCookie = getCookie('CompleteProfile');
 
-        if (completeProfileCookie != '3') {
+        if (completeProfileCookie != CompleteProfileNextStep.DONE) {
             setTimeout(() => {
                 navigate('/complete-info/1');
             }, 300);

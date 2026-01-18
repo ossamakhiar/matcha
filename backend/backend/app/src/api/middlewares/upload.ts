@@ -1,15 +1,13 @@
 import multer, { StorageEngine, FileFilterCallback } from 'multer';
 import path from 'path';
 import { Request } from 'express';
-import { getUserIdFromJwtService } from '../services/jwt.js';
 
 const storage: StorageEngine = multer.diskStorage({
     destination: (request: Request, file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) => {
         cb(null, 'uploads/'); // Specify the destination folder
     },
     filename: (request: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
-        const accessToken = request.cookies['AccessToken'] as string;
-        const { userId } = getUserIdFromJwtService(accessToken);
+        const userId = request.user.id;
         const userIdentifier = `user-${userId}-`;
 
         cb(null, userIdentifier + Date.now() + path.extname(file.originalname)); // Specify the filename

@@ -3,46 +3,50 @@ import { clearAllCookies, setAccessTokensCookie } from '../utils/cookies.js';
 import { validateJwtAccessTokenService, validateJwtRefreshTokenService } from '../services/jwt.js';
 import { extractAuthTokenService } from '../services/authToken.js';
 
-export function validateJwtToken(request: Request, response: Response, next: NextFunction) {
+export function validateJwtToken(
+    request: Request,
+    response: Response,
+    next: NextFunction
+) {
     const accessToken = request.cookies['AccessToken'];
     const refreshToken = request.cookies['RefreshToken'];
 
-    if (!accessToken || !refreshToken
-        || typeof accessToken != 'string' || typeof refreshToken != 'string') {
-
+    if (!accessToken || !refreshToken || typeof accessToken !== 'string' || typeof refreshToken !== 'string') {
         clearAllCookies(response);
-        response.status(401).send({ err: 'not authorized' });
-        return ;
+        return response.status(401).send({ err: 'not authorized' });
     }
 
     const accessTokenResult = validateJwtAccessTokenService(accessToken);
 
-    if (accessTokenResult.error == 'invalid token') {
+    if (accessTokenResult.error === 'invalid token') {
         clearAllCookies(response);
-        response.status(401).send({ err: 'not authorized' });
-        return ;
+        return response.status(401).send({ err: 'not authorized' });
     }
 
-    // console.log('expired access token!');
-    
-    if (accessTokenResult.error == 'expired token') {
-        const { userId } = validateJwtRefreshTokenService(refreshToken);
-        // console.log('refresh token id: ' + userId);
+    let userId: number | null = accessTokenResult.userId ?? null;
 
-        if (userId === null) {
-            // console.log('invalid refresh token!');
+    if (accessTokenResult.error === 'expired token') {
+        const refreshResult = validateJwtRefreshTokenService(refreshToken);
+
+        if (refreshResult.userId === null) {
             clearAllCookies(response);
-            response.status(401).send({ err: 'not authorized' });
-            return ;
+            return response.status(401).send({ err: 'not authorized' });
         }
 
+        userId = refreshResult.userId;
         setAccessTokensCookie(userId, response);
     }
 
-    // console.log(`JWT TOKENS VALIDATED!`);
-    request.user = { id: accessTokenResult.userId as number }; // attaching the jwt payload, to access it easily later
+    // final check (just to make sure userId is null even when code changes)
+    if (userId === null) {
+        clearAllCookies(response);
+        return response.status(401).send({ err: 'not authorized' });
+    }
+
+    request.user = { id: userId };
     next();
 }
+
 
 export function validateCSRFCookies(request: Request, response: Response, next: NextFunction) {
     const secretCookie = request.cookies['csrfSecretCookie'];

@@ -3,6 +3,7 @@ import { clearAllCookies, setCSRFcookies, setCompleteProfileInfoCookie, setJwtTo
 import { changePasswordService, emailValidationService, loginVerificationService, saveResetPasswordTokenService } from '../services/authentication.js';
 import { generateRandomTokenService } from '../services/hashing.js';
 import { sendForgetPasswordEmailService } from '../services/mailService.js';
+import { CompleteProfileNextStep } from '../types/enums.js';
 
 export async function localStrategyController(request: Request, response: Response): Promise<void> {
     try {
@@ -16,14 +17,12 @@ export async function localStrategyController(request: Request, response: Respon
             return ;
         }
 
-        // console.log('logged in successfully');
-    
         // set jwt tokens in httpOnly cookies to mitigate XSS attacks
         setJwtTokensAsHttpOnlyCookies(userId as number, response);
 
         // set profile as already complete
         if (is_profile_complete) {
-            setCompleteProfileInfoCookie(3, response);
+            setCompleteProfileInfoCookie(CompleteProfileNextStep.DONE, response);
         }
 
         // set CSRF cookies to mitigate CSRF attacks

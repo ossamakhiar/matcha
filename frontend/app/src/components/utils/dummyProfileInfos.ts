@@ -1,6 +1,6 @@
 import { ProfileInfo } from "../../types/profile";
 
-export let dummyProfileInfo: ProfileInfo[] = [
+export const dummyProfileInfo: ProfileInfo[] = [
     {
         userInfo: {
             id: '1',

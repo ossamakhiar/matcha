@@ -31,7 +31,7 @@ export async function validateDmParam(request: Request, response: Response, next
 
 export async function validateUserIdBody(request: Request, response: Response, next: NextFunction) {
     const userId = request.body.userId;
-    console.log(request.body);
+    // console.log(request.body);
 
     if (!userId || typeof userId != 'number') {
         response.status(400).json({status: 400, message: 'invalid user id'});

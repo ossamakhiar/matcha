@@ -11,7 +11,7 @@ import { RecommendedProfileInfos } from "../../types/profile"
 import { sendLoggedInActionRequest } from "../../utils/httpRequests"
 import NoResult from "../../components/utils/no-results/NoResults"
 import ErrorOccurred from "../../components/utils/error-occurred/ErrorOccurred"
-import { isOfRecommendedProfileInfosType } from "../../utils/typeGuards"
+import { isOfBackendRecommendedProfileType } from "../../utils/typeGuards"
 import { FaArrowLeft, FaMap } from "react-icons/fa6"
 import { Link, useNavigate } from "react-router-dom"
 import { InteractiveMap } from "./InterectiveMap"
@@ -124,15 +124,15 @@ const Explore = () => {
 
             const responseBody = await sendLoggedInActionRequest('POST', import.meta.env.VITE_LOCAL_RECOMMENDED_PROFILES_API_URL, requestBody);
 
+            console.log('recommendedProfiles: ', responseBody.recommendedProfiles);
+
             if (!responseBody || !responseBody.recommendedProfiles
                 || !Array.isArray(responseBody.recommendedProfiles)
-                && !responseBody.recommendedProfiles.every( (recommendedProfile: any) => isOfRecommendedProfileInfosType(recommendedProfile))) {
-                    console.log('heloooooo');
+                || !responseBody.recommendedProfiles.every( (recommendedProfile: any) => isOfBackendRecommendedProfileType(recommendedProfile))) {
+                console.log('hereeeee');
                 setErrorOccurred(true);
                 return ;
             }
-
-            console.log('recommendedProfiles: ' + responseBody.recommendedProfiles);
  
             if (responseBody.recommendedProfiles.length == 0) {
                 setNoResult(true)
@@ -144,6 +144,7 @@ const Explore = () => {
             setCurrIndex(0);
         }
         catch (err) {
+            console.log('hereeeee222', err);
             setErrorOccurred(true);
         } finally {
             setIsLoading(false);
@@ -238,7 +239,7 @@ const Explore = () => {
                     <FaArrowRight onClick={handleRightArrowClick} className="fill-white" size={34} />
                 </button>
             </div>
-            {isMapOpen && <InteractiveMap onClose={() => setIsMapOpen(false)} />}
+            {isMapOpen && <InteractiveMap onClose={() => setIsMapOpen(false)} recommendedProfiles={recommendedProfiles ?? []} />}
         </div>
     )
 }

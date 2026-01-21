@@ -12,7 +12,7 @@ export function setupOauth(passport: PassportStatic) {
         try {
             const userId = await findOrCreateUser(profile);
 
-            console.log('oauthUserId' + userId);
+            // console.log('oauthUserId' + userId);
             return done(null, userId);
         } catch (err) {
             return done(err, false);

@@ -9,78 +9,97 @@ import {
 } from "react-map-gl/maplibre";
 import useOutsideClick from "../../hooks/useOutsideClick";
 import { FaX } from "react-icons/fa6";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 // import { PiNavigationArrow } from "react-icons/pi";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useCurrentUserInfo } from "../../context/UserProvider";
-import { UserInfos } from "../../types/profile";
-import { sendLoggedInGetRequest } from "../../utils/httpRequests";
-import { isOfUserInfosType } from "../../utils/typeGuards";
+import { RecommendedProfileInfos } from "../../types/profile";
 import { UserBadge } from "../../components/profile/UserBadge";
 
 type InteractiveMapProps = {
   onClose: () => void;
+  recommendedProfiles: RecommendedProfileInfos[];
 };
 
 // TODO : might worth adding an endpoint, to return all of them directly.
-function useSearchAllUsers(): UserInfos[] {
-  const [allUsers, setUsers] = useState<UserInfos[]>([]);
+// function useSearchAllUsers(): UserInfos[] {
+//   const [allUsers, setUsers] = useState<UserInfos[]>([]);
 
-  async function searchUsers(
-    page: number,
-    pageSize: number
-  ): Promise<UserInfos[]> {
-    const base = import.meta.env.VITE_LOCAL_SEARCH as string;
+//   async function searchUsers(
+//     page: number,
+//     pageSize: number
+//   ): Promise<UserInfos[]> {
+//     const base = import.meta.env.VITE_LOCAL_SEARCH as string;
 
-    const url = new URL(base);
-    url.searchParams.set("page", String(page));
-    url.searchParams.set("pageSize", String(pageSize));
+//     const url = new URL(base);
+//     url.searchParams.set("page", String(page));
+//     url.searchParams.set("pageSize", String(pageSize));
 
-    try {
-      const data: unknown = await sendLoggedInGetRequest(url.toString());
+//     try {
+//       const data: unknown = await sendLoggedInGetRequest(url.toString());
 
-      if (Array.isArray(data) && data.every(isOfUserInfosType)) return data;
+//       if (Array.isArray(data) && data.every(isOfUserInfosType)) return data;
 
-      console.warn("searchUsers: API returned unexpected shape", data);
-      return [];
-    } catch (err) {
-      console.error("searchUsers failed", err);
-      return [];
-    }
-  }
+//       console.warn("searchUsers: API returned unexpected shape", data);
+//       return [];
+//     } catch (err) {
+//       console.error("searchUsers failed", err);
+//       return [];
+//     }
+//   }
 
-  useEffect(() => {
-    const getAllUser = async () => {
-      const allUsers: UserInfos[] = [];
-      let page = 0;
-      let returned: number = 0;
-      do {
-        const users = await searchUsers(page, 100);
-        allUsers.push(...users);
-        returned = users.length;
-      } while (returned === 100);
-      setUsers(allUsers);
-    };
+//   useEffect(() => {
+//     const getAllUser = async () => {
+//       const allUsers: UserInfos[] = [];
+//       let page = 0;
+//       let returned: number = 0;
+//       do {
+//         const users = await searchUsers(page, 100);
+//         allUsers.push(...users);
+//         returned = users.length;
+//       } while (returned === 100);
+//       setUsers(allUsers);
+//     };
 
-    getAllUser();
-  }, []);
+//     getAllUser();
+//   }, []);
 
-  return allUsers;
-}
+//   return allUsers;
+// }
 
-export function InteractiveMap({ onClose }: InteractiveMapProps) {
+export function InteractiveMap({ onClose, recommendedProfiles }: InteractiveMapProps) {
   const [popupInfo, setPopupInfo] = useState<any>(null);
 
-  const allUsers = useSearchAllUsers();
   const userInfo = useCurrentUserInfo();
   const ref = useOutsideClick(onClose);
 
   console.log(userInfo);
   if (!userInfo) return null;
 
+  const users = recommendedProfiles.map(user => {
+    return {
+      id: user.id,
+      isSelf: false,
+      longitude: user.longitude,
+      latitude: user.latitude,
+      profilePicture: user.profilePicture,
+    }
+  });
+
+  users.push({
+    id: userInfo.id,
+    isSelf: true,
+    longitude: userInfo.longitude,
+    latitude: userInfo.latitude,
+    profilePicture: userInfo.profilePicture
+  });
+
+  console.log('USERSSSS: ');
+  console.log(users);
+
   const pins = useMemo(
     () =>
-      allUsers.map((user) => (
+      users.map((user) => (
         <Marker
           key={`${user.id}`}
           longitude={user.longitude}
@@ -94,7 +113,7 @@ export function InteractiveMap({ onClose }: InteractiveMapProps) {
           <UserBadge user={user} />
         </Marker>
       )),
-    [allUsers]
+    [recommendedProfiles]
   );
 
   return (

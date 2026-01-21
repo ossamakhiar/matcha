@@ -11,7 +11,7 @@ export async function getRecommendedProfiles(request: Request, response: Respons
     const { userId } = getUserIdFromJwtService(accessToken);
     const filters: Filters = { fameRatingRange, ageRange };
 
-    if (interests) {
+    if (interests && interests.length) {
         filters.interests = interests;
     }
 
@@ -24,10 +24,10 @@ export async function getRecommendedProfiles(request: Request, response: Respons
         const recommendedProfiles = await getRecommendedProfilesService( userId as number, filters);
 
         if (recommendedProfiles.length === 0) {
-            console.log('no recommendedProfile');
+            // console.log('no recommendedProfile');
         }
 
-        console.log('recommendedProfiles: ' + recommendedProfiles);
+        // console.log('recommendedProfiles: ' + recommendedProfiles);
 
         response.status(200).send( { recommendedProfiles } );
     }

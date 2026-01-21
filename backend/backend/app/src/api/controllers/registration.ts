@@ -40,7 +40,7 @@ export async function localStrategyController(request: Request, response: Respon
 
         // send email verification without blocking the user
         sendEmailVerificationService(email, firstname, verificationToken).catch(err => {
-            console.log('error sending the verification email!');
+            // console.log('error sending the verification email!');
         });
 
         response.status(201).send( { msg: 'Registration successful. Please check your email to verify your account.' } );
@@ -60,7 +60,7 @@ export async function emailVerficiationController(request: Request, response: Re
         const userId = await userVerificationService(token);
 
         if (userId == undefined) {
-            console.log('user not verified');
+            // console.log('user not verified');
             response.status(403).send( { msg: 'token not found or expired!' } );
             return ;
         }
@@ -71,7 +71,7 @@ export async function emailVerficiationController(request: Request, response: Re
         // set CSRF cookies to mitigate CSRF attacks
         setCSRFcookies(response);
 
-        console.log('user verified successfully');
+        // console.log('user verified successfully');
 
         response.sendStatus(201);
     }

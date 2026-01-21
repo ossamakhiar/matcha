@@ -186,7 +186,7 @@ interface UserModel {
 
 const user = new Model<UserModel>('users');
 
-console.log("GOOD TESTS")
+// console.log("GOOD TESTS")
 user.find();
 
 user.find({

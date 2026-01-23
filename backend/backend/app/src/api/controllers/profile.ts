@@ -242,7 +242,7 @@ export async function storeUserLocation(request: Request, response: Response) {
     const userId = request.user.id;
     // TODO : add an indicator when the user denied, to use an IP geolocation fallback
 
-    console.log(request.body);
+    // console.log(request.body);
     try {
         await updateUserLocation(userId, request.body);
         response.sendStatus(200);

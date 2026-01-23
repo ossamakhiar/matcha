@@ -96,18 +96,23 @@ const   MatchedProfile = ({ profileInfo }: { profileInfo: RecommendedProfileInfo
 }
 
 type ExploreBaseProps = {
+    currFameRatingRange: number[] | null,
+    currAgeRange: number[] | null,
+    currInterests: Set<string> | null,
+    currMaxDistanceKm: number | null,
+    currSortBy: SortOption,
     recommendedProfiles: RecommendedProfileInfo[];
-    isAdvancedSearch: boolean;
     updateFiltersAndSortBy?: (
         newFameRatingRange: number[],
         newAgeRange: number[],
         newInterests: Set<string>,
         newMaxDistanceKm: number,
-        newSortBy: SortOption 
+        newSortBy: SortOption,
+        isFormDirty: boolean 
     ) => void;
 };
 
-const ExploreBase = ( { recommendedProfiles, isAdvancedSearch, updateFiltersAndSortBy }: ExploreBaseProps ) => {
+const ExploreBase = ( { currFameRatingRange, currAgeRange, currInterests, currMaxDistanceKm, currSortBy, recommendedProfiles, updateFiltersAndSortBy }: ExploreBaseProps ) => {
     let [isFilterOverlayOpen, setIsFilterOverlayOpen] = useState(false);
     let [isMapOpen, setIsMapOpen] = useState(false);
     let [currIndex, setCurrIndex] = useState(0);
@@ -120,10 +125,10 @@ const ExploreBase = ( { recommendedProfiles, isAdvancedSearch, updateFiltersAndS
         setCurrIndex(0);
     }, [recommendedProfiles]);
 
-    function handleFilterOverlayClose(newFameRatingRange: number[], newAgeRange: number[], newInterests: Set<string>, newMaxDistanceKm: number, newSortBy: SortOption) {
+    function handleFilterOverlayClose(newFameRatingRange: number[], newAgeRange: number[], newInterests: Set<string>, newMaxDistanceKm: number, newSortBy: SortOption, isFormDirty: boolean) {
         setIsFilterOverlayOpen(false);
         if (updateFiltersAndSortBy) {
-            updateFiltersAndSortBy(newFameRatingRange, newAgeRange, newInterests, newMaxDistanceKm, newSortBy);
+            updateFiltersAndSortBy(newFameRatingRange, newAgeRange, newInterests, newMaxDistanceKm, newSortBy, isFormDirty);
         }
     }
 
@@ -168,8 +173,8 @@ const ExploreBase = ( { recommendedProfiles, isAdvancedSearch, updateFiltersAndS
         <div className="flex justify-center w-screen pl-4 pr-4 md:pl-6 md:pr-6 lg:pl-10 lg:pr-10 xl:pl-32 xl:pr-32 2xl:pl-44 2xl:pr-44">
             { noResult && <NoResult />}
             { errorOccurred && <ErrorOccurred />}
-            <div className={(!isAdvancedSearch || !isFilterOverlayOpen || errorOccurred) ? 'hidden' : ''}>
-                <FilterOverlay handleFilterOverlayClose={handleFilterOverlayClose}/>
+            <div className={(!isFilterOverlayOpen || errorOccurred) ? 'hidden' : ''}>
+                <FilterOverlay currFameRatingRange={currFameRatingRange} currAgeRange={currAgeRange} currInterests={currInterests} currMaxDistanceKm={currMaxDistanceKm} currSortBy={currSortBy} handleFilterOverlayClose={handleFilterOverlayClose}/>
             </div>
             <div className={`pt-4 flex justify-center md:pt-6 w-screen ${errorOccurred || noResult ? 'hidden' : ''}`}>
                 {recommendedProfiles.length > 0 && <MatchedProfile profileInfo={recommendedProfiles[currIndex]}/>}
@@ -178,7 +183,7 @@ const ExploreBase = ( { recommendedProfiles, isAdvancedSearch, updateFiltersAndS
                 <button onClick={handleLeftArrowClick} className="bg-blue-950 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center hover:scale-125 transition-transform duration-300 ease-in-out">
                     <FaArrowLeft className="fill-white" size={34} />
                 </button>
-                <button  onClick={handleFilterButtonClick} className={`bg-blue-950 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center hover:scale-125 transition-transform duration-300 ease-in-out ${ !isAdvancedSearch && 'hidden' }`}>
+                <button  onClick={handleFilterButtonClick} className="bg-blue-950 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center hover:scale-125 transition-transform duration-300 ease-in-out">
                     <ImFilter className="fill-white" size={30} />
                 </button>
                 <button  onClick={() => setIsMapOpen(true)} className="bg-blue-950 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center hover:scale-125 transition-transform duration-300 ease-in-out">

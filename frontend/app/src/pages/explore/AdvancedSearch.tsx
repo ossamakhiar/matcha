@@ -9,12 +9,11 @@ import { useCurrentUserInfo } from "../../context/UserProvider"
 import { haversineDistanceKm } from "../../utils/generalPurpose"
 
 const AdvancedSearch = () => {
-    let [fameRatingRange, setFameRatingRange] = useState([0, 5]);
-    let [ageRange, setAgeRange] = useState([18, 30]);
-    let [maxDistanceKm, setMaxDistanceKm] = useState(500);
-    let [interests, setInterests] = useState<Set<string>>();
+    let [fameRatingRange, setFameRatingRange] = useState<number[] | null>(null);
+    let [ageRange, setAgeRange] = useState<number[] | null>(null);
+    let [maxDistanceKm, setMaxDistanceKm] = useState<number | null>(null);
+    let [interests, setInterests] = useState<Set<string> | null>(null);
     let [recommendedProfiles, setRecommendedProfiles] = useState<RecommendedProfileInfo[]>();
-    let [isLoading, setIsLoading] = useState(true);
     let [errorOccurred, setErrorOccurred] = useState(false);
     let [sortBy, setSortBy] = useState<SortOption>(null);
 
@@ -66,10 +65,9 @@ const AdvancedSearch = () => {
                 return sorted;
         }
     }
-    
+
 
     async function fetchProfiles() {
-        setIsLoading(true);
         setErrorOccurred(false);
         try {
             const requestBody: {[key: string]: any} = { fameRatingRange, ageRange, maxDistanceKm };
@@ -78,16 +76,11 @@ const AdvancedSearch = () => {
                 requestBody['interests'] = [...interests];
             }
 
-            console.log('AdvancedSearch AgeFilter: ' + requestBody.ageRange);
-            console.log('AdvancedSearch FameRatingFilter: ' + requestBody.fameRatingRange);
-            console.log('AdvancedSearch maxDistanceKm: ' + requestBody.maxDistanceKm);
-            console.log('AdvancedSearch sortBy: ' + sortBy);
-
             const responseBody = await sendLoggedInActionRequest('POST', import.meta.env.VITE_LOCAL_RECOMMENDED_PROFILES_API_URL, requestBody);
 
             console.log('AdvancedSearch recommendedProfiles: ', responseBody.recommendedProfiles);
 
-            if (!responseBody || !responseBody.recommendedProfiles
+            if (!responseBody?.recommendedProfiles
                 || !Array.isArray(responseBody.recommendedProfiles)
                 || !responseBody.recommendedProfiles.every( (recommendedProfile: any) => isOfBackendRecommendedProfileType(recommendedProfile))) {
                 setErrorOccurred(true);
@@ -111,24 +104,26 @@ const AdvancedSearch = () => {
         }
         catch (err) {
             setErrorOccurred(true);
-        } finally {
-            setIsLoading(false);
         }
     }
 
     useEffect(() => {
-        fetchProfiles();
+        if (fameRatingRange !== null &&
+            ageRange !== null &&
+            maxDistanceKm !== null
+        ) {
+            fetchProfiles();
+        }
     }, [fameRatingRange, ageRange, interests, maxDistanceKm, sortBy]);
-
-    if (isLoading) {
-        return (null);
-    }
 
     if (errorOccurred) {
         return <ErrorOccurred />;
     }
 
-    function updateFiltersAndSortBy(newFameRatingRange: number[], newAgeRange: number[], newInterests: Set<string>, newMaxDistanceKm: number, newSortBy: SortOption) {
+    function updateFiltersAndSortBy(newFameRatingRange: number[], newAgeRange: number[], newInterests: Set<string>, newMaxDistanceKm: number, newSortBy: SortOption, isFormDirty: boolean) {
+        if (!isFormDirty) {
+            return ;
+        }
         setFameRatingRange(newFameRatingRange);
         setAgeRange(newAgeRange);
         setInterests(newInterests);
@@ -137,7 +132,7 @@ const AdvancedSearch = () => {
     }
 
     return (
-        <ExploreBase recommendedProfiles={recommendedProfiles ?? []} isAdvancedSearch={true} updateFiltersAndSortBy={updateFiltersAndSortBy} />
+        <ExploreBase currFameRatingRange={fameRatingRange} currAgeRange={ageRange} currInterests={interests || new Set<string>()} currMaxDistanceKm={maxDistanceKm} currSortBy={sortBy} recommendedProfiles={recommendedProfiles ?? []} updateFiltersAndSortBy={updateFiltersAndSortBy} />
     )
 }
 

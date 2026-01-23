@@ -9,50 +9,88 @@ import { SortOption } from "../../types/explore";
 
 
 type FilterOverlayProps = {
+  currFameRatingRange: readonly number[] | null,
+  currAgeRange: readonly number[] | null,
+  currInterests: Set<string> | null,
+  currMaxDistanceKm: number | null,
+  currSortBy: SortOption,
   handleFilterOverlayClose: (
     fameRatingRange: number[],
     ageRange: number[],
     interests: Set<string>,
     maxDistanceKm: number,
-    sortBy: SortOption
+    sortBy: SortOption,
+    isFormDirty: boolean
   ) => void;
 };
 
-function FilterOverlay({ handleFilterOverlayClose }: FilterOverlayProps) {
+function FilterOverlay({ currFameRatingRange, currAgeRange, currInterests, currMaxDistanceKm, currSortBy, handleFilterOverlayClose }: FilterOverlayProps) {
+  // constants
+  const DEFAULT_MIN_FAME = 0;
+  const DEFAULT_MAX_FAME = 5;
+  const DEFAULT_MIN_AGE = 18;
+  const DEFAULT_MAX_AGE = 30;
+  const DEFAULT_MAX_DISTANCE_KM = 50;
+
   // filter states
-  const [minFameRating, setMinFameRating] = useState(0);
-  const [maxFameRating, setMaxFameRating] = useState(5);
-  const [minAge, setMinAge] = useState(18);
-  const [maxAge, setMaxAge] = useState(30);
-  const [selectedInterests, setSelectedInterests] = useState<Set<string>>(new Set([]));
-  const [maxDistanceKm, setMaxDistanceKm] = useState(500);
+  const [minFameRating, setMinFameRating] = useState(currFameRatingRange?.[0] ?? DEFAULT_MIN_FAME);
+  const [maxFameRating, setMaxFameRating] = useState(currFameRatingRange?.[1] ?? DEFAULT_MAX_FAME);
+  const [minAge, setMinAge] = useState(currAgeRange?.[0] ?? DEFAULT_MIN_AGE);
+  const [maxAge, setMaxAge] = useState(currAgeRange?.[1] ?? DEFAULT_MAX_AGE);
+  const [selectedInterests, setSelectedInterests] = useState<Set<string>>(new Set(currInterests ?? []));
+  const [maxDistanceKm, setMaxDistanceKm] = useState(currMaxDistanceKm ?? DEFAULT_MAX_DISTANCE_KM);  
 
   // sort state
-  const [sortBy, setSortBy] = useState<SortOption>(null);
+  const [sortBy, setSortBy] = useState<SortOption>(currSortBy);
 
-  // close overlay if clicking outside
+  function sameSet<T>(a: Set<T>, b: Set<T>): boolean {
+    if (a.size !== b.size) return false; // different number of elements
+  
+    for (const item of a) {
+      if (!b.has(item)) return false; // missing element
+    }
+  
+    return true; // all elements match
+  }
+
+  function computeIsFormDirty(): boolean {
+    const fameDirty = minFameRating !== (currFameRatingRange?.[0] ?? DEFAULT_MIN_FAME) ||
+                      maxFameRating !== (currFameRatingRange?.[1] ?? DEFAULT_MAX_FAME);
+  
+    const ageDirty = minAge !== (currAgeRange?.[0] ?? DEFAULT_MIN_AGE) ||
+                     maxAge !== (currAgeRange?.[1] ?? DEFAULT_MAX_AGE);
+  
+    const distanceDirty = maxDistanceKm !== (currMaxDistanceKm ?? DEFAULT_MAX_DISTANCE_KM);
+  
+    const interestsDirty = !sameSet(selectedInterests, currInterests ?? new Set());
+
+    const sortDirty = sortBy !== currSortBy;
+  
+    return fameDirty || ageDirty || distanceDirty || interestsDirty || sortDirty;
+  }
+  
+
+  // overlay close handlers
   function handleBackgroundClick(e: React.MouseEvent<HTMLDivElement>) {
     const classes = (e.target as HTMLElement).classList;
     if (classes.contains("bg-black") && classes.contains("bg-opacity-40")) {
-      handleFilterOverlayClose(
-        [minFameRating, maxFameRating],
-        [minAge, maxAge],
-        selectedInterests,
-        maxDistanceKm,
-        sortBy
-      );
+      handleClose();
     }
   }
 
   function handleClose() {
+    const isFormDirty = computeIsFormDirty();
+  
     handleFilterOverlayClose(
       [minFameRating, maxFameRating],
       [minAge, maxAge],
       selectedInterests,
       maxDistanceKm,
-      sortBy
+      sortBy,
+      isFormDirty
     );
   }
+  
 
   // filter handlers
   function handleFameRatingFilterApply(min: number, max: number) {

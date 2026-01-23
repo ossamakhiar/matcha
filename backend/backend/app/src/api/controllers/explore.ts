@@ -7,7 +7,7 @@ export async function getRecommendedProfiles(request: Request, response: Respons
     const ageRange = request.body.ageRange;
     const interests = request.body.interests;
     const maxDistanceKm = request.body.maxDistanceKm;
-    const commonInterestsTreshold = request.body.commonInterestsTreshold;
+    const commonInterestsThreshold = request.body.commonInterestsThreshold;
     const userId = request.user.id;
 
     const filters: Filters = { fameRatingRange, ageRange, maxDistanceKm };
@@ -16,18 +16,12 @@ export async function getRecommendedProfiles(request: Request, response: Respons
         filters.interests = interests;
     }
 
-    if (commonInterestsTreshold) {
-        filters.commonInterestsTreshold = commonInterestsTreshold;
+    if (commonInterestsThreshold !== undefined) {
+        filters.commonInterestsThreshold = commonInterestsThreshold;
     }
 
     try {
         const recommendedProfiles = await getRecommendedProfilesService(userId, filters);
-
-        if (recommendedProfiles.length === 0) {
-            // console.log('no recommendedProfile');
-        }
-
-        // console.log('recommendedProfiles: ' + recommendedProfiles);
 
         response.status(200).send( { recommendedProfiles } );
     }

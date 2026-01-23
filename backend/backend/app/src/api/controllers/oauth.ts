@@ -8,7 +8,7 @@ dotenv.config();
 
 export async function discordCallbackController(request: Request, response: Response) {
     if (request.user && typeof request.user == 'number') {
-        console.log(`requestCallbackUserId: ${request.user}`);
+        // console.log(`requestCallbackUserId: ${request.user}`);
         // set jwt tokens in httpOnly cookies to mitigate XSS attacks
         setJwtTokensAsHttpOnlyCookies(request.user as number, response);
 

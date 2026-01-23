@@ -8,22 +8,19 @@ import { getUserInterests } from "./profile.js";
 dotenv.config();
 
 export async function getRecommendedProfilesService(userId: number, filters: Filters): Promise<RecommendedProfileInfo[]> {
-    // console.log('AgeFilter: ' + filters.ageRange);
-    // console.log('FameRatingFitler: ' + filters.fameRatingRange);
-    // console.log('interests: ' + filters.interests);
     try {
+        console.log('filters: ', filters)
         const userInterests = filters.interests ?? await getUserInterests(userId);
         let profiles = await filterProfilesByPersonalInfo(userId, filters.fameRatingRange, filters.ageRange);
         profiles = await filterProfilesByLocation(userId, profiles, filters.maxDistanceKm);
-        // console.log('userInterests: ' + userInterests);
 
         let filteredIds = profiles.map(profile => Number(profile.id));
         if (filteredIds.length === 0) return [];
 
         filteredIds = await filterAlreadyLikedProfiles(userId, filteredIds);
         if (filteredIds.length === 0) return [];
-        const commonInterestsTreshold = filters.commonInterestsTreshold ?? userInterests.length;
-        const interestsFilteredIds = await filterProfilesByInterests(userId, filteredIds, userInterests, commonInterestsTreshold);
+        const commonInterestsThreshold = filters.commonInterestsThreshold ?? userInterests.length;
+        const interestsFilteredIds = await filterProfilesByInterests(userId, filteredIds, userInterests, commonInterestsThreshold);
         if (interestsFilteredIds.length === 0) return [];
 
         const interestsFilteredIdsMap = new Map<number, [number, string[]]>(
@@ -79,9 +76,6 @@ async function filterProfilesByPersonalInfo(
         const userPreferences = userPreferencesResult.rows[0];
         const sexualPreferences = getMatchingSexualOrientation(userPreferences.gender, userPreferences.sexual_preference);
         const oppositeGenders = getOppositeGenders(userPreferences.gender);
-
-        // console.log('suggestedSexualPreferences: ' + sexualPreferences);
-        // console.log('suggestedGenders: ' + oppositeGenders);
 
         const profilesQuery = `
             SELECT id, first_name, last_name, username, latitude, longitude, age, gender,

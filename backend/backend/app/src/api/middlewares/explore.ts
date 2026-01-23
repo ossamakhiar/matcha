@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express'
 import { isArray } from '../validators/generalPurpose.js';
 
 export function validateRecommendedProfilesBody(request: Request, response: Response, next: NextFunction) {
-    const { fameRatingRange, ageRange, interests, maxDistanceKm, commonInterestsTreshold } = request.body;
+    const { fameRatingRange, ageRange, interests, maxDistanceKm, commonInterestsThreshold } = request.body;
 
 
     if (!isArray(fameRatingRange, 2, 'number')) {
@@ -20,13 +20,13 @@ export function validateRecommendedProfilesBody(request: Request, response: Resp
         return ;
     }
 
-    if (!maxDistanceKm || typeof maxDistanceKm !== 'number') {
+    if (maxDistanceKm === undefined || typeof maxDistanceKm !== 'number') {
         response.status(400).send( { msg: 'invalid maxDistanceKm field!' } );
         return ;
     }
 
-    if (commonInterestsTreshold && typeof commonInterestsTreshold !== 'number') {
-        response.status(400).send( { msg: 'invalid commonInterestsTreshold field!' } );
+    if (commonInterestsThreshold !== undefined && typeof commonInterestsThreshold !== 'number') {
+        response.status(400).send( { msg: 'invalid commonInterestsThreshold field!' } );
         return ;
     }
     next();

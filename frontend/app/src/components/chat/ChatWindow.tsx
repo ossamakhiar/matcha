@@ -42,7 +42,7 @@ function    registerEventHandlers(setMessages: Dispatch<SetStateAction<any[] | u
     }
 
     const selectedConversationPresenceHandler = (onlineUsers: number[]) => {
-        const status = onlineUsers.indexOf(activeDmId) !== -1 ? 'online' : 'offline';
+        const status = onlineUsers.includes(activeDmId) ? 'online' : 'offline';
         setParticipant((prev) => {
             if (!prev || status === prev.status)
                 return (prev);
@@ -64,7 +64,6 @@ const ChatWindow = () => {
     const   {activeDmId} = useActiveDm();
     const   messages = usePaginatedFetch<MessageType>(`${import.meta.env.VITE_LOCAL_CHAT_DMS}/${activeDmId}`);
     const   [participant, setParticipant] = useFetch<ParticipantUser>(`${import.meta.env.VITE_LOCAL_CHAT_DM_PARTICIPANT}/${activeDmId}`);
-    // const   [participant, setParticipant] = useState<ParticipantUser>();
 
     registerEventHandlers(messages.setData, setParticipant);
     const   handleFavoriteClick = async (conversationId: number) => {
@@ -85,10 +84,7 @@ const ChatWindow = () => {
         }
     }
 
-    const   reversed_data = [...(messages.data || [])];
-    reversed_data.reverse();
-
-    console.log(reversed_data);
+    const   reversed_data = [...(messages.data || [])].reverse();
 
     return (
         <MessagesProvider

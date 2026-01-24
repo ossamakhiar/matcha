@@ -11,7 +11,7 @@ const Message: FC<MessageProps> = ({isAudio, isSender, message, sentAt}) => {
                 :
                 <div className={`h-min border p-1 max-w-[85%] md:max-w-[70%] rounded-t-lg text-sm md:text-base ${ isSender ? 'rounded-bl-lg bg-light-gray1 ' : 'rounded-br-lg bg-red-light'}  break-words`}>
                     { message }
-                    <p className={`text-gray-500 text-xs flex ${!isSender ? "justify-end" : "justify-start"}`}>{ sentAt }</p>
+                    <p className={`text-gray-500 text-xs flex ${isSender ? "justify-start" : "justify-end"}`}>{ sentAt }</p>
                 </div>
             }
         </div>

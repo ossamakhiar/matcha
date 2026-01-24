@@ -20,12 +20,11 @@ const   ChatInputField = ({onSend}: {onSend: () => void}) => {
     const   socket = useSocket();
     const   { activeDmId } = useActiveDm();
     const   inputRef = useRef<HTMLInputElement>(null);
-    const   {startRecording, stopRecording, isRecording, audioArrayBuffer, audioClear, audioSeconds} = useRecorder();
+    const   {startRecording, stopRecording, isRecording, audioSeconds} = useRecorder();
 
     useEffect(() => {
         if (inputRef.current) inputRef.current.focus();
         return () => {
-            audioClear();
             stopRecording();
         }
     }, [activeDmId])
@@ -41,35 +40,23 @@ const   ChatInputField = ({onSend}: {onSend: () => void}) => {
     }
 
     const   sendHandler = () => {
-        if (audioArrayBuffer) {
-            console.log(audioArrayBuffer);
-            sendMessage({type: 'audio', content: audioArrayBuffer, to: activeDmId});
-            audioClear();
+        if (isRecording) {
+            stopRecording().then((data) =>
+                sendMessage({type: 'audio', content: data, to: activeDmId})
+            );
         } else {
-            if (!inputRef.current || !inputRef.current.value)
-                return ;
+            if (!inputRef?.current?.value) return ;
             sendMessage({type: 'text', content: inputRef.current.value, to: activeDmId});
             inputRef.current.value = '';
         }
         onSend();
     }
 
-    const   handleAudioRecording = () => {
-        !isRecording ? startRecording() : stopRecording();
-    }
-
     return (
         <div className="relative pt-2">
 
             <div className="absolute bottom-2 w-full px-3">
-                {!isRecording && !audioArrayBuffer ?
-                    <input
-                        ref={inputRef}
-                        type="text"
-                        placeholder="Enter your message"
-                        className="outline-none border w-full p-3 px-3 pr-20 rounded-lg"
-                        onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && sendHandler()}
-                    /> :
+                {isRecording ?
                     <div className="w-full flex items-center p-3 border rounded-lg gap-4 bg-transparent pr-20">
                         <div className="font-semibold">
                             {formatMinuteSecond(audioSeconds)}
@@ -94,13 +81,21 @@ const   ChatInputField = ({onSend}: {onSend: () => void}) => {
                         }
                         </div>
                     </div>
+                    :
+                    <input
+                        ref={inputRef}
+                        type="text"
+                        placeholder="Enter your message"
+                        className="outline-none border w-full p-3 px-3 pr-20 rounded-lg"
+                        onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && sendHandler()}
+                    />
                 }
 
 
 
                 <div className="absolute bottom-0 top-0 right-5 flex items-center gap-2">
-                    <button className={`${inputRef.current && inputRef.current.value ? 'hidden' : ''}`}>
-                        <AiOutlineAudio size={25} className="fill-gray-500 hover:fill-black" onClick={handleAudioRecording} />
+                    <button className={`${inputRef?.current?.value || isRecording ? 'hidden' : ''}`}>
+                        <AiOutlineAudio size={25} className="fill-gray-500 hover:fill-black" onClick={startRecording} />
                     </button>
                     <button className="p-1 bg-pink rounded-md" onClick={sendHandler}>
                         <IoSend size={25} className="fill-white" />

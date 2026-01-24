@@ -76,11 +76,11 @@ const Chat = () => {
 
     return (
         <ActiveDmProvider value={{activeDmId, setActiveDmId}}>
-            {error ? (
+            {error && (
                 <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white rounded-lg px-6 py-3 z-50 shadow-lg animate-fade-in-down">
                     {error}
                 </div>
-                ) : null}
+            )}
             <div className="flex justify-around w-screen h-[calc(100vh-80px)]">
                 <div className="w-[90%] m-5 border border-e0 rounded-xl shadow-md flex">
                     <div className={`w-full ${isDmActive ? "hidden" : ''} md:inline-block md:w-1/3 lg:w-1/4 h-full md:border-r`}>

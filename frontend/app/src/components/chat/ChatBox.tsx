@@ -10,6 +10,7 @@ const   ChatBox = () => {
     const {activeDmId} = useActiveDm();
     const chatBoxRef = useRef<HTMLDivElement>(null);
     const { messages, fetchMoreMessages, hasMore } = useMessages();
+    // ! too many boolean state which might be indicating same state?
     const [shouldScrollDown, setShouldScrollDown] = useState<boolean>(true);
     const [showScrollButton, setShowScrollButton] = useState<boolean>(false); // ? this will be true if the user viewing older messages
     const [prevScrollHeight, setPrevScrollHeight] = useState(0);
@@ -40,7 +41,6 @@ const   ChatBox = () => {
         }
         
         if (scrollTop === 0 && hasMore) {
-            console.log('MORE DMS');
             fetchMoreMessages(); // ? this function should fetch more data when the user consume all the dms history
             setMoreData(true);
             setPrevScrollHeight(scrollHeight)
@@ -48,8 +48,7 @@ const   ChatBox = () => {
     }
 
     const handleScrollButtonClick = () => {
-        if (!chatBoxRef.current)
-            return ;
+        if (!chatBoxRef.current) return ;
         chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
     }
 
@@ -79,10 +78,9 @@ const   ChatBox = () => {
                                 const   isAudio = message.messageType === 'audio';
                                 return (
                                     <div
-                                        key={index} // ! add the id of the message instead of the array index
+                                        key={message.sentAt} // ! add the id of the message instead of the array index
                                         className={`mr-1 my-2 md:my-2 lg:my-3 ${(index > 0 && arr[index-1].isSender != arr[index].isSender ? 'mt-3 md:mt-5 lg:mt-6' : '')} ${index == messages.length - 1 ? 'mb-3' : ''}`}
                                         >
-                                        {/* // <audio controls src={URL.createObjectURL(new Blob([message.messageContent], {type: 'audio/wav'}))}></audio> */}
                                         <Message
                                             key={message.messageId}
                                             message={message.messageContent}

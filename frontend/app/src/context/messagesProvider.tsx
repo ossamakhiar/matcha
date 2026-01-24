@@ -5,7 +5,7 @@ import { MessageType } from "../types";
 type    MessageContextType = {
     messages: MessageType[],
     setMessages: Dispatch<SetStateAction<MessageType[] | undefined>>,
-    fetchMoreMessages: () => void;
+    fetchMoreMessages: () => Promise<void>;
     hasMore: boolean;
 }
 

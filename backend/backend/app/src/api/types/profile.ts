@@ -1,10 +1,10 @@
-export type ProfileInfos = {
-    userInfos: UserInfos;
+export type ProfileInfo = {
+    userInfo: UserInfo;
     interests: string[];
     userPhotos: string[];
 }
 
-export type UserInfos = {
+export type UserInfo = {
     id: string;
     isSelf: boolean;
     isLiked: boolean;
@@ -22,7 +22,7 @@ export type UserInfos = {
     fameRating: number;
 };
 
-export type RecommendedProfileInfos = {
+export type RecommendedProfileInfo = {
     id: string;
     firstName: string;
     lastName: string;
@@ -40,7 +40,7 @@ export type RecommendedProfileInfos = {
     profilePhotos: string[];
 };
 
-export type BriefProfileInfos = {
+export type BriefProfileInfo = {
     id: string;
     firstName: string;
     lastName: string;
@@ -52,7 +52,7 @@ export type BriefProfileInfos = {
     profilePicture: string;
 };
 
-export type updateProfilePersonalInfos = {
+export type updateProfilePersonalInfo = {
     profilePicturePath: string | null;
     username: string;
     firstname: string;

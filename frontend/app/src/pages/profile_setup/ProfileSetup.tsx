@@ -4,6 +4,7 @@ import ImageCard from "../../components/utils/ImageCard";
 import { sendFormDataRequest } from "../../utils/httpRequests";
 import { useNavigate } from "react-router-dom";
 import { getCookie } from "../../utils/generalPurpose";
+import { CompleteProfileNextStep } from "../../types/enums";
 
 type ImageCardsProps = {
     images: File[];
@@ -40,9 +41,9 @@ export default function ProfileSetup() {
     useEffect(() => {
         const completeProfileCookie = getCookie('CompleteProfile');
 
-        if (completeProfileCookie != '2') {
+        if (completeProfileCookie != CompleteProfileNextStep.PHOTOS_NEXT) {
             const navRoute = completeProfileCookie == undefined ? '/complete-info/1'
-                : completeProfileCookie == '1' ? '/complete-info/2' : '/profile'
+                : completeProfileCookie == CompleteProfileNextStep.INTERESTS_NEXT ? '/complete-info/2' : '/profile'
 
             setTimeout(() => {
                 navigate(navRoute);

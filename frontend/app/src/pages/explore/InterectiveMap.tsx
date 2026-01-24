@@ -13,22 +13,22 @@ import { useMemo, useState } from "react";
 // import { PiNavigationArrow } from "react-icons/pi";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useCurrentUserInfo } from "../../context/UserProvider";
-import { RecommendedProfileInfos } from "../../types/profile";
+import { RecommendedProfileInfo } from "../../types/profile";
 import { UserBadge } from "../../components/profile/UserBadge";
 
 type InteractiveMapProps = {
   onClose: () => void;
-  recommendedProfiles: RecommendedProfileInfos[];
+  recommendedProfiles: RecommendedProfileInfo[];
 };
 
 // TODO : might worth adding an endpoint, to return all of them directly.
-// function useSearchAllUsers(): UserInfos[] {
-//   const [allUsers, setUsers] = useState<UserInfos[]>([]);
+// function useSearchAllUsers(): UserInfo[] {
+//   const [allUsers, setUsers] = useState<UserInfo[]>([]);
 
 //   async function searchUsers(
 //     page: number,
 //     pageSize: number
-//   ): Promise<UserInfos[]> {
+//   ): Promise<UserInfo[]> {
 //     const base = import.meta.env.VITE_LOCAL_SEARCH as string;
 
 //     const url = new URL(base);
@@ -38,7 +38,7 @@ type InteractiveMapProps = {
 //     try {
 //       const data: unknown = await sendLoggedInGetRequest(url.toString());
 
-//       if (Array.isArray(data) && data.every(isOfUserInfosType)) return data;
+//       if (Array.isArray(data) && data.every(isOfUserInfoType)) return data;
 
 //       console.warn("searchUsers: API returned unexpected shape", data);
 //       return [];
@@ -50,7 +50,7 @@ type InteractiveMapProps = {
 
 //   useEffect(() => {
 //     const getAllUser = async () => {
-//       const allUsers: UserInfos[] = [];
+//       const allUsers: UserInfo[] = [];
 //       let page = 0;
 //       let returned: number = 0;
 //       do {

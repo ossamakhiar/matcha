@@ -2,13 +2,14 @@ import { FC, ReactNode, useEffect, useState } from "react";
 import LoggedInHeader from "../components/header/LoggedInHeader";
 import SocketProvider from '../context/SocketProvider';
 import { getCookie } from "../utils/generalPurpose";
-import { useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { sendGetRequestWithoutCreds, sendLoggedInActionRequest } from "../utils/httpRequests";
 import UserInfoProvider from "../context/UserProvider";
 import { isOfCoordsType } from "../utils/typeGuards";
+import { CompleteProfileNextStep } from "../types/enums";
 
 type Props = {
-    children: ReactNode;
+    children?: ReactNode;
 }
 
 const locationUrl = import.meta.env.VITE_LOCAL_PROFILE_SEND_LOCATION as string;
@@ -76,7 +77,7 @@ const LoggedInLayout: FC<Props> = ({children}) =>  {
 
         const completeProfileCookie = getCookie('CompleteProfile');
 
-        if (completeProfileCookie != '3') {
+        if (completeProfileCookie != CompleteProfileNextStep.DONE) {
             setTimeout(() => {
                 navigate('/complete-info/1');
             }, 300);
@@ -88,7 +89,7 @@ const LoggedInLayout: FC<Props> = ({children}) =>  {
     }, [])
 
     if (isLoading) {
-        return ;
+      return null;
     }
 
     return (
@@ -96,7 +97,7 @@ const LoggedInLayout: FC<Props> = ({children}) =>  {
         <UserInfoProvider>
           <LocationBootstrap />
           <LoggedInHeader />
-          {children}
+          {children ?? <Outlet />}
         </UserInfoProvider>
       </SocketProvider>
     )

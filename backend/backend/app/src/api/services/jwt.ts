@@ -39,7 +39,3 @@ export function validateJwtAccessTokenService(token: string): {userId: number | 
 export function validateJwtRefreshTokenService(token: string): {userId: number | null, error: string | null} {
     return validateJwtTokenService(token, process.env.REFRESH_TOKEN_SECRET as string);
 }
-
-export function getUserIdFromJwtService(AccessToken: string) {
-    return validateJwtTokenService(AccessToken, process.env.ACCESS_TOKEN_SECRET as string);
-}

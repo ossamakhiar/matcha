@@ -2,33 +2,33 @@
 
 
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { UserInfos } from '../types/profile';
+import { UserInfo } from '../types/profile';
 import { sendLoggedInGetRequest } from '../utils/httpRequests';
-// import { isOfProfileInfosType } from '../utils/typeGuards';
+// import { isOfProfileInfoType } from '../utils/typeGuards';
 
 type Props = {
     children: ReactNode;
 }
 
-const   UserInfoContext = createContext<UserInfos | null>(null);
+const   UserInfoContext = createContext<UserInfo | null>(null);
 
 const   UserInfoProvider = ({children}: Props) => {
-    const [profileInfos, setProfileInfos] = useState<UserInfos | null>(null)
+    const [profileInfo, setProfileInfo] = useState<UserInfo | null>(null)
     // const [errors, setErrorOccurred] = useState<boolean>(false)
 
     useEffect(() => {
         (async function initializeComponent() {
             try {
 
-                const profileInfosUrl = import.meta.env.VITE_LOCAL_CURR_PROFILE_INFOS_API_URL;
-                const responseBody = await sendLoggedInGetRequest(profileInfosUrl);
+                const profileInfoUrl = import.meta.env.VITE_LOCAL_CURR_PROFILE_INFO_API_URL;
+                const responseBody = await sendLoggedInGetRequest(profileInfoUrl);
             
-                // if (!responseBody || !isOfProfileInfosType(responseBody.profileInfos)) {
+                // if (!responseBody || !isOfProfileInfoType(responseBody.profileInfo)) {
                 //     setErrorOccurred(true);
                 //     return ;
                 // }
 
-                setProfileInfos(responseBody.profileInfos.userInfos);
+                setProfileInfo(responseBody.profileInfo.userInfo);
             } catch(err) {
                 console.log(err)
                 // setErrorOccurred(true);
@@ -38,7 +38,7 @@ const   UserInfoProvider = ({children}: Props) => {
 
 
     return (
-        <UserInfoContext.Provider value={profileInfos}>
+        <UserInfoContext.Provider value={profileInfo}>
             {children}
         </UserInfoContext.Provider>
     )

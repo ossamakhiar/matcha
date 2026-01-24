@@ -1,10 +1,10 @@
 import pool from "../model/pgPoolConfig.js";
-import { UserInfos } from "../types/profile.js";
+import { UserInfo } from "../types/profile.js";
 
 
 
 // ! should i return the user himself who requested the search if the its info matchs the search query? id <> $1
-export async function getSearchResultService(userId: number, searchQueryStr: string, page: number, pageSize: number): Promise<UserInfos[]> {
+export async function getSearchResultService(userId: number, searchQueryStr: string, page: number, pageSize: number): Promise<UserInfo[]> {
     const client = await pool.connect();
     const searchQuery = `
                     SELECT

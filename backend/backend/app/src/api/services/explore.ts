@@ -1,29 +1,26 @@
 import pool from "../model/pgPoolConfig.js";
 import { Filters } from "../types/explore.js";
-import { RecommendedProfileInfos } from "../types/profile.js";
+import { RecommendedProfileInfo } from "../types/profile.js";
 import { getMatchingSexualOrientation, getOppositeGenders } from "../utils/explore.js";
 import dotenv from 'dotenv'
 import { getUserInterests } from "./profile.js";
 
 dotenv.config();
 
-export async function getRecommendedProfilesService(userId: number, filters: Filters): Promise<RecommendedProfileInfos[]> {
-    // console.log('AgeFilter: ' + filters.ageRange);
-    // console.log('FameRatingFitler: ' + filters.fameRatingRange);
-    // console.log('interests: ' + filters.interests);
+export async function getRecommendedProfilesService(userId: number, filters: Filters): Promise<RecommendedProfileInfo[]> {
     try {
+        console.log('filters: ', filters)
         const userInterests = filters.interests ?? await getUserInterests(userId);
-        const profiles = await filterProfilesByPersonalInfos(userId, filters.fameRatingRange, filters.ageRange);
-
-        console.log('userInterests: ' + userInterests);
+        let profiles = await filterProfilesByPersonalInfo(userId, filters.fameRatingRange, filters.ageRange);
+        profiles = await filterProfilesByLocation(userId, profiles, filters.maxDistanceKm);
 
         let filteredIds = profiles.map(profile => Number(profile.id));
         if (filteredIds.length === 0) return [];
 
         filteredIds = await filterAlreadyLikedProfiles(userId, filteredIds);
         if (filteredIds.length === 0) return [];
-
-        const interestsFilteredIds = await filterProfilesByInterests(userId, filteredIds, userInterests, 1);
+        const commonInterestsThreshold = filters.commonInterestsThreshold ?? userInterests.length;
+        const interestsFilteredIds = await filterProfilesByInterests(userId, filteredIds, userInterests, commonInterestsThreshold);
         if (interestsFilteredIds.length === 0) return [];
 
         const interestsFilteredIdsMap = new Map<number, [number, string[]]>(
@@ -49,7 +46,6 @@ export async function getRecommendedProfilesService(userId: number, filters: Fil
         finalProfiles.forEach(profile => {
             profile.profilePhotos = profilePhotosMap.get(Number(profile.id)) || [];
         });
-        // sort the profiles
 
         finalProfiles = await filterBlockedUsers(userId, finalProfiles);
 
@@ -60,11 +56,11 @@ export async function getRecommendedProfilesService(userId: number, filters: Fil
     }
 }
 
-async function filterProfilesByPersonalInfos(
+async function filterProfilesByPersonalInfo(
     userId: number,
     fameRatingRange: number[],
     ageRange: number[]
-): Promise<RecommendedProfileInfos[]> {
+): Promise<RecommendedProfileInfo[]> {
     let client;
 
     try {
@@ -81,11 +77,8 @@ async function filterProfilesByPersonalInfos(
         const sexualPreferences = getMatchingSexualOrientation(userPreferences.gender, userPreferences.sexual_preference);
         const oppositeGenders = getOppositeGenders(userPreferences.gender);
 
-        console.log('suggestedSexualPreferences: ' + sexualPreferences);
-        console.log('suggestedGenders: ' + oppositeGenders);
-
         const profilesQuery = `
-            SELECT id, first_name, last_name, username, age, gender,
+            SELECT id, first_name, last_name, username, latitude, longitude, age, gender,
             sexual_preference, biography, profile_picture, fame_rating 
             FROM "user" 
             WHERE id != $1 
@@ -98,7 +91,6 @@ async function filterProfilesByPersonalInfos(
             AND age BETWEEN $6 AND $7
             LIMIT 30;
         `;
-
         const profilesResult = await client.query(profilesQuery, [
             userId,
             sexualPreferences,
@@ -119,6 +111,8 @@ async function filterProfilesByPersonalInfos(
                 firstName: user.first_name,
                 lastName: user.last_name,
                 userName: user.username,
+                latitude: Number(user.latitude),
+                longitude: Number(user.longitude),
                 age: user.age ?? 18,
                 gender: user.gender ?? '',
                 sexualPreferences: user.sexual_preference ?? '',
@@ -266,8 +260,8 @@ async function getProfilesPhotos(userIds: number[]): Promise<{ userId: number, p
 
 async function filterBlockedUsers(
     userId: number,
-    profiles: RecommendedProfileInfos[]
-): Promise<RecommendedProfileInfos[]> {
+    profiles: RecommendedProfileInfo[]
+): Promise<RecommendedProfileInfo[]> {
     const client = await pool.connect();
 
     try {
@@ -294,5 +288,71 @@ async function filterBlockedUsers(
         throw new Error('Failed to filter blocked users');
     } finally {
         client.release();
+    }
+}
+
+function degreesToRadians(deg: number): number {
+    return deg * (Math.PI / 180);
+}
+
+function calculateDistanceKm(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+): number {
+    const EARTH_RADIUS_KM = 6371;
+
+    const dLat = degreesToRadians(lat2 - lat1);
+    const dLon = degreesToRadians(lon2 - lon1);
+
+    const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(degreesToRadians(lat1)) *
+        Math.cos(degreesToRadians(lat2)) *
+        Math.sin(dLon / 2) ** 2;
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return EARTH_RADIUS_KM * c;
+}
+
+
+async function filterProfilesByLocation(
+    userId: number,
+    profiles: RecommendedProfileInfo[],
+    maxDistanceKm?: number
+): Promise<RecommendedProfileInfo[]> {
+    if (!maxDistanceKm) return profiles;
+
+    let client;
+
+    try {
+        client = await pool.connect();
+
+        const query = `
+            SELECT latitude, longitude
+            FROM "user"
+            WHERE id = $1
+        `;
+        const result = await client.query(query, [userId]);
+
+        if (result.rows.length === 0) return profiles;
+
+        const userLat = Number(result.rows[0].latitude);
+        const userLng = Number(result.rows[0].longitude);
+
+        return profiles.filter(profile => {
+            const distance = calculateDistanceKm(userLat, userLng, profile.latitude, profile.longitude);
+
+            return distance <= maxDistanceKm;
+        });
+    } catch (err) {
+        console.error("Error filtering profiles by location:", err);
+        return profiles;
+    } finally {
+        if (client) {
+            client.release();
+        }
     }
 }

@@ -53,10 +53,10 @@ export function validateCompleteProfileBody(request: Request, response: Response
 }
 
 export async function checkIfAlreadyCompleted(request: Request, response: Response, next: NextFunction) {
-    const completeInfosCookie = request.cookies['CompleteProfile'];
+    const completeInfoCookie = request.cookies['CompleteProfile'];
 
-    if (completeInfosCookie && completeInfosCookie === 3) {
-        response.status(403).send( { url: process.env.FRONTENT_PROFILE_URL } );
+    if (completeInfoCookie && completeInfoCookie === 3) {
+        response.status(403).send( { url: process.env.FRONTEND_PROFILE_URL } );
         return ;
     }
 

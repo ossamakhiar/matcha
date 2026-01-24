@@ -9,7 +9,6 @@ import Chat from "../pages/chat/Chat";
 import PersonalInfo from "../pages/profile_setup/PersonalInfo";
 import CompleteInfo from "../pages/profile_setup/CompleteInfo";
 import InterestTag from "../pages/profile_setup/InterestTag";
-import Explore from "../pages/explore/Explore";
 import UserProfile from "../pages/profile/UserProfile";
 import LoggedInLayout from "../layouts/LoggedInLayout";
 import SearchResults from "../pages/search_results/SearchResults";
@@ -20,6 +19,9 @@ import ResetPassword from "../pages/auth/resetVerification";
 import CommonLayout from "../layouts/CommonLayout";
 import NotificationPage from "../pages/notification/NotificationPage";
 import NotFound from "../components/utils/not-found/NotFound";
+import AdvancedSearch from "../pages/explore/AdvancedSearch";
+import Recommendation from "../pages/explore/Recommendation";
+import ExploreGate from "../pages/explore/ExploreGate";
 
 const router = createBrowserRouter([
     {
@@ -48,30 +50,35 @@ const router = createBrowserRouter([
     },
     {
       path: '/complete-info',
-      
-      element: <SetupLayout><CompleteInfo /></SetupLayout>,
+      element: <SetupLayout />,
       children: [
         {
-          path: '1',
-          element: <PersonalInfo />,
-        },
-        {
-          path: '2',
-          element: <InterestTag />,
-        },
-        {
-          path: '3',
-          element: <ProfileSetup />,
-        },
-        {
-          path: '*',
-          element: <div>404 Not Found -_-</div>,
-        },
-      ],
+          element: <CompleteInfo />,
+          children: [
+            { path: '1', element: <PersonalInfo /> },
+            { path: '2', element: <InterestTag /> },
+            { path: '3', element: <ProfileSetup /> },
+          ]
+        }
+      ]
     },    
     {
       path: '/explore',
-      element: <LoggedInLayout><Explore /></LoggedInLayout>
+      element: <LoggedInLayout />,
+      children: [
+        {
+          index: true,
+          element: <ExploreGate />   // popup / choice screen
+        },
+        {
+          path: 'recommendation',
+          element: <Recommendation />
+        },
+        {
+          path: 'advancedSearch',
+          element: <AdvancedSearch />
+        }
+      ]
     },
     {
       path: '/chat/:conversationId?',

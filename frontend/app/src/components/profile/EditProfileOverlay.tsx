@@ -2,14 +2,14 @@ import './style.css';
 import React, { useState } from 'react';
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
-import { ProfileInfos } from '../../types/profile';
+import { ProfileInfo } from '../../types/profile';
 import { sendFormDataRequest } from '../../utils/httpRequests';
 import { getFormError } from '../../utils/typeGuards';
 import ImageEditorModal from './ImageEditorModal';
 
 type EditProfileOverlayProps = {
-    profileInfos: ProfileInfos;
-    handleEditOverlayClose: (newProfileInfos: ProfileInfos | null) => void;
+    profileInfo: ProfileInfo;
+    handleEditOverlayClose: (newProfileInfo: ProfileInfo | null) => void;
 };
 
 const buttonStyle = {
@@ -53,7 +53,7 @@ type FormValues = {
     sexualPreference: string;
 }
 
-function EditProfileOverlay({ profileInfos, handleEditOverlayClose }: EditProfileOverlayProps) {
+function EditProfileOverlay({ profileInfo, handleEditOverlayClose }: EditProfileOverlayProps) {
     let [image, setImage] = useState<File>();
     const [pendingFile, setPendingFile] = useState<File | null>(null);
 
@@ -94,23 +94,23 @@ function EditProfileOverlay({ profileInfos, handleEditOverlayClose }: EditProfil
         console.log(...formData);
 
         try {
-            let responseBody = await sendFormDataRequest('POST', import.meta.env.VITE_LOCAL_UPDATE_PERSONAL_INFOS_API_URL as string, formData);
+            let responseBody = await sendFormDataRequest('POST', import.meta.env.VITE_LOCAL_UPDATE_PERSONAL_INFO_API_URL as string, formData);
 
-            let newProfileInfos = {...profileInfos };
+            let newProfileInfo = {...profileInfo };
 
-            newProfileInfos.userInfos.firstName = values.firstname;
-            newProfileInfos.userInfos.lastName = values.lastname;
-            newProfileInfos.userInfos.userName = values.username;
-            newProfileInfos.userInfos.age = values.age;
-            newProfileInfos.userInfos.biography = values.biography;
-            newProfileInfos.userInfos.gender = values.gender;
-            newProfileInfos.userInfos.sexualPreferences = values.sexualPreference;
+            newProfileInfo.userInfo.firstName = values.firstname;
+            newProfileInfo.userInfo.lastName = values.lastname;
+            newProfileInfo.userInfo.userName = values.username;
+            newProfileInfo.userInfo.age = values.age;
+            newProfileInfo.userInfo.biography = values.biography;
+            newProfileInfo.userInfo.gender = values.gender;
+            newProfileInfo.userInfo.sexualPreferences = values.sexualPreference;
 
             if (responseBody.imageUrl) {
-                newProfileInfos.userInfos.profilePicture = responseBody.imageUrl;
+                newProfileInfo.userInfo.profilePicture = responseBody.imageUrl;
             }
 
-            handleEditOverlayClose(newProfileInfos);
+            handleEditOverlayClose(newProfileInfo);
         } catch (error) {
             let formError = getFormError(error);
 
@@ -167,13 +167,13 @@ function EditProfileOverlay({ profileInfos, handleEditOverlayClose }: EditProfil
                     <hr className="divider"></hr>
                     <Formik
                         initialValues={{
-                            firstname: profileInfos.userInfos.firstName,
-                            lastname: profileInfos.userInfos.lastName,
-                            username: profileInfos.userInfos.userName,
-                            age: profileInfos.userInfos.age,
-                            gender: profileInfos.userInfos.gender,
-                            sexualPreference: profileInfos.userInfos.sexualPreferences,
-                            biography: profileInfos.userInfos.biography
+                            firstname: profileInfo.userInfo.firstName,
+                            lastname: profileInfo.userInfo.lastName,
+                            username: profileInfo.userInfo.userName,
+                            age: profileInfo.userInfo.age,
+                            gender: profileInfo.userInfo.gender,
+                            sexualPreference: profileInfo.userInfo.sexualPreferences,
+                            biography: profileInfo.userInfo.biography
                         }}
                         validationSchema={validationSchema}
                         onSubmit={handleSubmit}
@@ -195,7 +195,7 @@ function EditProfileOverlay({ profileInfos, handleEditOverlayClose }: EditProfil
                                                 className="cursor-pointer sm:ml-8 mr-4 sm:mr-8 w-52 h-52 bg-cover bg-no-repeat bg-center rounded-full bg-gray-300"
                                                 style={{
                                                 backgroundImage: `url(${
-                                                    image ? URL.createObjectURL(image) : profileInfos.userInfos.profilePicture
+                                                    image ? URL.createObjectURL(image) : profileInfo.userInfo.profilePicture
                                                 })`,
                                                 }}
                                             />

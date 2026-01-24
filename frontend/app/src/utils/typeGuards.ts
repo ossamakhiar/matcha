@@ -1,4 +1,4 @@
-import { BriefProfileInfos, ProfileInfos, RecommendedProfileInfos, UserInfos } from "../types/profile";
+import { BackendRecommendedProfile, BriefProfileInfo, Coords, ProfileInfo, UserInfo } from "../types/profile";
 import { isArray } from "./generalPurpose";
 
 export function getFormError(error: unknown): FormError | undefined {
@@ -16,38 +16,38 @@ export function getFormError(error: unknown): FormError | undefined {
     return (undefined);
 }
 
-export function isOfUserInfosType(obj: any): obj is UserInfos {
+export function isOfUserInfoType(obj: any): obj is UserInfo {
     return (
-    obj !== null && typeof obj === 'object' &&
-    // typeof obj.id === 'string' && // !! there is an inconsitenty here it could be number
-    typeof obj.isSelf === 'boolean' &&
-    typeof obj.isLiked === 'boolean' &&
-    typeof obj.isLiking === 'boolean' &&
-    typeof obj.firstName === 'string' &&
-    typeof obj.lastName === 'string' &&
-    typeof obj.userName === 'string' &&
-    typeof obj.longitude === 'number' &&
-    typeof obj.latitude === 'number' &&
-    typeof obj.age === 'number' &&
-    typeof obj.gender === 'string' &&
-    typeof obj.sexualPreferences === 'string' &&
-    typeof obj.profilePicture === 'string' &&
-    typeof obj.biography === 'string' &&
-    typeof obj.fameRating === 'number'
+      obj !== null && typeof obj === 'object' &&
+      (typeof obj.id === 'string' || typeof obj.id === 'number') &&
+      typeof obj.isSelf === 'boolean' &&
+      typeof obj.isLiked === 'boolean' &&
+      typeof obj.isLiking === 'boolean' &&
+      typeof obj.firstName === 'string' &&
+      typeof obj.lastName === 'string' &&
+      typeof obj.userName === 'string' &&
+      typeof obj.longitude === 'number' &&
+      typeof obj.latitude === 'number' &&
+      typeof obj.age === 'number' &&
+      typeof obj.gender === 'string' &&
+      typeof obj.sexualPreferences === 'string' &&
+      typeof obj.profilePicture === 'string' &&
+      typeof obj.biography === 'string' &&
+      typeof obj.fameRating === 'number'
     );
 }
-
-export function isOfProfileInfosType(obj: any) : obj is ProfileInfos {
+  
+export function isOfProfileInfoType(obj: any) : obj is ProfileInfo {
     return (
         obj !== null && typeof obj === 'object'
         && isArray(obj.interests, undefined, 'string')
         && isArray(obj.userPhotos, undefined, 'string')
         && obj.userPhotos.length <= 4
-        && isOfUserInfosType(obj.userInfos)
+        && isOfUserInfoType(obj.userInfo)
     );
 }
 
-export function isOfBriefProfileInfosType(obj: any): obj is BriefProfileInfos {
+export function isOfBriefProfileInfoType(obj: any): obj is BriefProfileInfo {
     return (
     obj !== null && typeof obj === 'object' &&
     typeof obj.id === 'string' &&
@@ -62,9 +62,10 @@ export function isOfBriefProfileInfosType(obj: any): obj is BriefProfileInfos {
     );
 }
 
-export function isOfRecommendedProfileInfosType(obj: any): obj is RecommendedProfileInfos {
+export function isOfBackendRecommendedProfileType(obj: any): obj is BackendRecommendedProfile {
     return (
-        obj !== null && typeof obj === 'object' &&
+        obj !== null &&
+        typeof obj === 'object' &&
         typeof obj.id === 'string' &&
         typeof obj.firstName === 'string' &&
         typeof obj.lastName === 'string' &&
@@ -76,23 +77,21 @@ export function isOfRecommendedProfileInfosType(obj: any): obj is RecommendedPro
         typeof obj.biography === 'string' &&
         typeof obj.fameRating === 'number' &&
         typeof obj.commonInterestsCount === 'number' &&
-        isArray(obj.profileInterests, undefined, 'string') &&
-        isArray(obj.profilePhotos, undefined, 'string')
+        typeof obj.latitude === 'number' &&
+        typeof obj.longitude === 'number' &&
+        Array.isArray(obj.profileInterests) &&
+        obj.profileInterests.every((i: any) => typeof i === 'string') &&
+        Array.isArray(obj.profilePhotos) &&
+        obj.profilePhotos.every((p: any) => typeof p === 'string')
     );
 }
 
-// export type RecommendedProfileInfos = {
-//     id: string;
-//     firstName: string;
-//     lastName: string;
-//     userName: string;
-//     age: number;
-//     gender: string;
-//     sexualPreferences: string;
-//     profilePicture: string; // URL
-//     biography: string;
-//     fameRating: number;
-//     commonInterestsCount: number;
-//     profileInterests: Set<string>;
-//     profilePhotos: string[];
-// };
+
+export function isOfCoordsType(obj: any): obj is Coords {
+    return (
+        obj !== null && typeof obj === 'object' &&
+        typeof obj.lat === 'number' &&
+        typeof obj.lon === 'number'
+    )
+}
+

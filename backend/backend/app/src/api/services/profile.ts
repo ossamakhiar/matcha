@@ -1,6 +1,6 @@
 import interestsList from "../helpers/interestsList.js";
 import pool from "../model/pgPoolConfig.js";
-import { BriefProfileInfos, ProfileInfos, UserInfos } from "../types/profile.js";
+import { BriefProfileInfo, ProfileInfo, UserInfo } from "../types/profile.js";
 import dotenv from 'dotenv'
 
 dotenv.config();
@@ -62,7 +62,7 @@ async function getUserPhotos(userId: number): Promise<string[]> {
     }
 }
 
-async function getUserInfos(userId: number, visitorUserId: number): Promise<UserInfos> {
+async function getUserInfo(userId: number, visitorUserId: number): Promise<UserInfo> {
     let client;
 
     try {
@@ -73,7 +73,7 @@ async function getUserInfos(userId: number, visitorUserId: number): Promise<User
         const result = await client.query(query, [userId]);
 
         if (result.rows.length === 0) {
-            throw new Error(`couldn't retrieve user infos`);
+            throw new Error(`couldn't retrieve user info`);
         }
 
         const user = result.rows[0];
@@ -124,7 +124,7 @@ async function getUserInfos(userId: number, visitorUserId: number): Promise<User
         });
     }
     catch (err) {
-        throw new Error('failed to retrieve brief profile infos');
+        throw new Error('failed to retrieve brief profile info');
     } finally {
         if (client) {
             client.release();
@@ -132,19 +132,19 @@ async function getUserInfos(userId: number, visitorUserId: number): Promise<User
     }
 }
 
-export async function getProfileInfosService(userId: number, visitorUserId: number): Promise<ProfileInfos | undefined> {
+export async function getProfileInfoService(userId: number, visitorUserId: number): Promise<ProfileInfo | undefined> {
     if (!userId) {
         return (undefined);
     }
 
-    const userInfos = await getUserInfos(userId, visitorUserId);
+    const userInfo = await getUserInfo(userId, visitorUserId);
     const interests = await getUserInterests(userId);
     const userPhotos = await getUserPhotos(userId);
 
-    return ({userInfos, interests, userPhotos});
+    return ({userInfo, interests, userPhotos});
 }
 
-export async function getBriefProfileInfosService(userId: number): Promise<BriefProfileInfos | undefined> {
+export async function getBriefProfileInfoService(userId: number): Promise<BriefProfileInfo | undefined> {
     let client;
 
     try {
@@ -173,7 +173,7 @@ export async function getBriefProfileInfosService(userId: number): Promise<Brief
         })
     }
     catch (err) {
-        throw new Error('failed to retrieve brief profile infos');
+        throw new Error('failed to retrieve brief profile info');
     } finally {
         if (client) {
             client.release();

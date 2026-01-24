@@ -1,5 +1,4 @@
 import { Request, Response } from 'express'
-import { getUserIdFromJwtService } from '../services/jwt.js';
 import { Filters } from '../types/explore.js';
 import { getRecommendedProfilesService } from '../services/explore.js';
 
@@ -7,27 +6,22 @@ export async function getRecommendedProfiles(request: Request, response: Respons
     const fameRatingRange = request.body.fameRatingRange;
     const ageRange = request.body.ageRange;
     const interests = request.body.interests;
-    const accessToken = request.cookies['AccessToken'] as string;
-    const { userId } = getUserIdFromJwtService(accessToken);
-    const filters: Filters = { fameRatingRange, ageRange };
+    const maxDistanceKm = request.body.maxDistanceKm;
+    const commonInterestsThreshold = request.body.commonInterestsThreshold;
+    const userId = request.user.id;
 
-    if (interests) {
+    const filters: Filters = { fameRatingRange, ageRange, maxDistanceKm };
+
+    if (interests?.length) {
         filters.interests = interests;
     }
 
-    if (!userId) {
-        response.sendStatus(500);
-        return ;
+    if (commonInterestsThreshold !== undefined) {
+        filters.commonInterestsThreshold = commonInterestsThreshold;
     }
 
     try {
-        const recommendedProfiles = await getRecommendedProfilesService( userId as number, filters);
-
-        if (recommendedProfiles.length === 0) {
-            console.log('no recommendedProfile');
-        }
-
-        console.log('recommendedProfiles: ' + recommendedProfiles);
+        const recommendedProfiles = await getRecommendedProfilesService(userId, filters);
 
         response.status(200).send( { recommendedProfiles } );
     }

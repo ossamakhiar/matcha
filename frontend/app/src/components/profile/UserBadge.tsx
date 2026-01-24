@@ -1,7 +1,13 @@
-import { UserInfos } from "../../types/profile";
+type UserBadgeUserInfo = {
+  id: string,
+  isSelf: boolean,
+  longitude: number,
+  latitude: number,
+  profilePicture: string,
+}
 
 type UserBadgeProps = {
-  user: UserInfos;
+  user: UserBadgeUserInfo;
 };
 
 export function UserBadge({ user }: UserBadgeProps) {

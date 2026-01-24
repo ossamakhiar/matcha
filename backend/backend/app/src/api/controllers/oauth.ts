@@ -1,13 +1,14 @@
 import { Request, Response } from 'express'
 import dotenv from 'dotenv'
-import { setCSRFcookies, setCompleteProfileInfosCookie, setJwtTokensAsHttpOnlyCookies } from '../utils/cookies.js';
+import { setCSRFcookies, setCompleteProfileInfoCookie, setJwtTokensAsHttpOnlyCookies } from '../utils/cookies.js';
 import { isProfileComplete } from '../services/oauth.js';
+import { CompleteProfileNextStep } from '../types/enums.js';
 
 dotenv.config();
 
 export async function discordCallbackController(request: Request, response: Response) {
     if (request.user && typeof request.user == 'number') {
-        console.log(`requestCallbackUserId: ${request.user}`);
+        // console.log(`requestCallbackUserId: ${request.user}`);
         // set jwt tokens in httpOnly cookies to mitigate XSS attacks
         setJwtTokensAsHttpOnlyCookies(request.user as number, response);
 
@@ -18,9 +19,9 @@ export async function discordCallbackController(request: Request, response: Resp
 
         // set profile as already complete
         if (is_profile_complete) {
-            setCompleteProfileInfosCookie(3, response);
+            setCompleteProfileInfoCookie(CompleteProfileNextStep.DONE, response);
         }
     }
 
-    response.redirect(process.env.FRONTENT_PROFILE_URL as string);
+    response.redirect(process.env.FRONTEND_PROFILE_URL as string);
 }

@@ -45,7 +45,7 @@ export function setAccessTokensCookie(userId: number, response: Response) {
     });
 }
 
-export function setCompleteProfileInfosCookie(value: number, response: Response) {
+export function setCompleteProfileInfoCookie(value: number, response: Response) {
     response.cookie('CompleteProfile', value, {
         httpOnly: false,
         sameSite: 'lax',

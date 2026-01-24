@@ -3,7 +3,7 @@ import { useState, ChangeEvent, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Gender from '../utils/Gender';
 import SexualPreferences from '../utils/SexualPreferences';
-import { UserInfos } from '../../types/profile';
+import { UserInfo } from '../../types/profile';
 import { sendLoggedInGetRequest } from '../../utils/httpRequests';
 
 type SearchProps = {
@@ -17,7 +17,7 @@ function Search({isSmallSearchOpen, handleSearchOpen, handleSearchClose}: Search
     let [query, setQuery] = useState('');
     const searchRef = useRef<HTMLInputElement>(null);
     const navigate = useNavigate();
-    const [searchResults, setSearchResults] = useState<UserInfos[]>([]);
+    const [searchResults, setSearchResults] = useState<UserInfo[]>([]);
 
     useEffect(() => {
         if (searchRef.current && isSmallSearchOpen) {

@@ -1,5 +1,5 @@
 import dotenv from 'dotenv'
-import { updateProfilePersonalInfos } from '../types/profile.js';
+import { updateProfilePersonalInfo } from '../types/profile.js';
 import pool from '../model/pgPoolConfig.js';
 
 dotenv.config();
@@ -30,7 +30,7 @@ export async function addUserPhotosService(userId: number, imageUrls: string[]) 
     }
 }
 
-export async function updatePersonalInfosService(userId: number, profileInfos: updateProfilePersonalInfos) {
+export async function updatePersonalInfoService(userId: number, profileInfo: updateProfilePersonalInfo) {
     let client;
 
     try {
@@ -46,10 +46,10 @@ export async function updatePersonalInfosService(userId: number, profileInfos: u
             WHERE id = $9;`;
         client = await pool.connect();
 
-        await client.query(query, [profileInfos.firstname, profileInfos.lastname,
-        profileInfos.age, profileInfos.biography, profileInfos.gender,
-        profileInfos.sexualPreference, profileInfos.username,
-        profileInfos.profilePicturePath,
+        await client.query(query, [profileInfo.firstname, profileInfo.lastname,
+        profileInfo.age, profileInfo.biography, profileInfo.gender,
+        profileInfo.sexualPreference, profileInfo.username,
+        profileInfo.profilePicturePath,
             userId
         ])
     }

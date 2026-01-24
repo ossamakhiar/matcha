@@ -4,6 +4,7 @@ import { sendLoggedInActionRequest } from "../../utils/httpRequests";
 import { useNavigate } from "react-router-dom";
 import { getCookie } from "../../utils/generalPurpose";
 import Tag from "../../components/utils/Tag";
+import { CompleteProfileNextStep } from "../../types/enums";
 
 const InterestTag = () => {
     const   [selectedTags, setSelectedTags] = useState<Set<string>>(new Set())
@@ -14,9 +15,9 @@ const InterestTag = () => {
     useEffect(() => {
         const completeProfileCookie = getCookie('CompleteProfile');
 
-        if (completeProfileCookie != '1') {
+        if (completeProfileCookie != CompleteProfileNextStep.INTERESTS_NEXT) {
             const navRoute = completeProfileCookie == undefined ? '/complete-info/1'
-                : completeProfileCookie == '2' ? '/complete-info/3' : '/profile'
+                : completeProfileCookie == CompleteProfileNextStep.PHOTOS_NEXT ? '/complete-info/3' : '/profile'
 
             setTimeout(() => {
                 navigate(navRoute);

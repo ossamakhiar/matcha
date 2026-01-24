@@ -1,12 +1,11 @@
-import { FC, ReactNode } from "react";
 import GuestHeader from "../components/header/GuestHeader";
+import { Outlet } from "react-router-dom";
 
-const SetupLayout: FC<{children: ReactNode}> = ({children}) => {
-
+const SetupLayout = () => {
     return (
         <>
             <GuestHeader />
-            { children }
+            <Outlet />
         </>
     )
 }

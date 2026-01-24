@@ -15,6 +15,13 @@ export enum NotificationTypesEnum {
     UNLIKE = 'unlike'
 }
 
+export enum CompleteProfileNextStep {
+    INTERESTS_NEXT = 1,
+    PHOTOS_NEXT = 2,
+    DONE = 3,
+}
+
+
 export const ACTOR_NAME_PLACEHOLDER = '{actor_name}';
 
 /*

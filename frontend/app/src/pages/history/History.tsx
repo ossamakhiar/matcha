@@ -3,10 +3,10 @@ import Gender from "../../components/utils/Gender";
 import SexualPreferences from "../../components/utils/SexualPreferences";
 // import dummySearchResults from "../../components/utils/dummySearchResults";
 import usePaginatedFetch from "../../hooks/usePaginatedFetch";
-import { BriefProfileInfosPresence } from "../../types/profile";
+import { BriefProfileInfoPresence } from "../../types/profile";
 
 function History() {
-    const {data: historyResults, fetchMoreData, hasMore} = usePaginatedFetch<BriefProfileInfosPresence>(import.meta.env.VITE_LOCAL_HISTORY);
+    const {data: historyResults, fetchMoreData, hasMore} = usePaginatedFetch<BriefProfileInfoPresence>(import.meta.env.VITE_LOCAL_HISTORY);
 
 
     return (

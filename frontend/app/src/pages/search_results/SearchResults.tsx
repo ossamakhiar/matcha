@@ -4,14 +4,14 @@ import SexualPreferences from "../../components/utils/SexualPreferences";
 import Gender from "../../components/utils/Gender";
 import './style.css'
 import usePaginatedFetch from "../../hooks/usePaginatedFetch";
-import { UserInfos } from "../../types/profile";
+import { UserInfo } from "../../types/profile";
 
 function SearchResults() {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const SearchQuery = queryParams.get('query');
 
-    const {data, fetchMoreData, hasMore} = usePaginatedFetch<UserInfos>(import.meta.env.VITE_LOCAL_SEARCH, {s: SearchQuery || ''});
+    const {data, fetchMoreData, hasMore} = usePaginatedFetch<UserInfo>(import.meta.env.VITE_LOCAL_SEARCH, {s: SearchQuery || ''});
     // i should update the way usePaginatedFetch handles query, by extartcing all the queries string first from the given url and then add the page and pageSize
 
     // need to implement a search results logic in a seperate module

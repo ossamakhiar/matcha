@@ -1,85 +1,229 @@
+
+
 import { useState } from "react";
 import FameRatingFilter from "./FameRatingFilter";
 import InterestsInput from "../utils/InterestsInput";
 import AgeGapFilter from "./age-gap-filter/AgeGapFilter";
+import GeoLocationFilter from "./GeoLocationFilter";
+import { SortOption } from "../../types/explore";
+
 
 type FilterOverlayProps = {
-    handleFilterOverlayClose: (fameRatingRange: number[], ageRange: number[], interests: Set<string>) => void;
+  currFameRatingRange: readonly number[] | null,
+  currAgeRange: readonly number[] | null,
+  currInterests: Set<string> | null,
+  currMaxDistanceKm: number | null,
+  currSortBy: SortOption,
+  handleFilterOverlayClose: (
+    fameRatingRange: number[],
+    ageRange: number[],
+    interests: Set<string>,
+    maxDistanceKm: number,
+    sortBy: SortOption,
+    isFormDirty: boolean
+  ) => void;
 };
 
-function FilterOverlay({handleFilterOverlayClose}: FilterOverlayProps) {
-    let [minFameRating, setMinFameRating] = useState(0);
-    let [maxFameRating, setMaxFameRating] = useState(5);
-    let [minAge, setMinAge] = useState(18);
-    let [maxAge, setMaxAge] = useState(30);
-    let [selectedInterests, setSelectedInterests] = useState<Set<string>>(new Set([]));
+function FilterOverlay({ currFameRatingRange, currAgeRange, currInterests, currMaxDistanceKm, currSortBy, handleFilterOverlayClose }: FilterOverlayProps) {
+  // constants
+  const DEFAULT_MIN_FAME = 0;
+  const DEFAULT_MAX_FAME = 5;
+  const DEFAULT_MIN_AGE = 18;
+  const DEFAULT_MAX_AGE = 30;
+  const DEFAULT_MAX_DISTANCE_KM = 50;
 
-    function handleBackgroundClick(e: React.MouseEvent<HTMLDivElement>) {
-        const classes = (e.target as HTMLElement).classList;
-        if (classes.contains('bg-black') && classes.contains('bg-opacity-40')) {
-            handleFilterOverlayClose([minFameRating, maxFameRating], [minAge, maxAge], selectedInterests);
-        }
+  // filter states
+  const [minFameRating, setMinFameRating] = useState(currFameRatingRange?.[0] ?? DEFAULT_MIN_FAME);
+  const [maxFameRating, setMaxFameRating] = useState(currFameRatingRange?.[1] ?? DEFAULT_MAX_FAME);
+  const [minAge, setMinAge] = useState(currAgeRange?.[0] ?? DEFAULT_MIN_AGE);
+  const [maxAge, setMaxAge] = useState(currAgeRange?.[1] ?? DEFAULT_MAX_AGE);
+  const [selectedInterests, setSelectedInterests] = useState<Set<string>>(new Set(currInterests ?? []));
+  const [maxDistanceKm, setMaxDistanceKm] = useState(currMaxDistanceKm ?? DEFAULT_MAX_DISTANCE_KM);  
+
+  // sort state
+  const [sortBy, setSortBy] = useState<SortOption>(currSortBy);
+
+  function sameSet<T>(a: Set<T>, b: Set<T>): boolean {
+    if (a.size !== b.size) return false; // different number of elements
+  
+    for (const item of a) {
+      if (!b.has(item)) return false; // missing element
     }
+  
+    return true; // all elements match
+  }
 
-    function handleClose() {
-        handleFilterOverlayClose([minFameRating, maxFameRating], [minAge, maxAge], selectedInterests);
+  function computeIsFormDirty(): boolean {
+    const fameDirty = minFameRating !== (currFameRatingRange?.[0] ?? DEFAULT_MIN_FAME) ||
+                      maxFameRating !== (currFameRatingRange?.[1] ?? DEFAULT_MAX_FAME);
+  
+    const ageDirty = minAge !== (currAgeRange?.[0] ?? DEFAULT_MIN_AGE) ||
+                     maxAge !== (currAgeRange?.[1] ?? DEFAULT_MAX_AGE);
+  
+    const distanceDirty = maxDistanceKm !== (currMaxDistanceKm ?? DEFAULT_MAX_DISTANCE_KM);
+  
+    const interestsDirty = !sameSet(selectedInterests, currInterests ?? new Set());
+
+    const sortDirty = sortBy !== currSortBy;
+  
+    return fameDirty || ageDirty || distanceDirty || interestsDirty || sortDirty;
+  }
+  
+
+  // overlay close handlers
+  function handleBackgroundClick(e: React.MouseEvent<HTMLDivElement>) {
+    const classes = (e.target as HTMLElement).classList;
+    if (classes.contains("bg-black") && classes.contains("bg-opacity-40")) {
+      handleClose();
     }
+  }
 
-    // function handleSubmit() {
-    //     // handle submit
-    //     handleFilterOverlayClose();
-    // }
+  function handleClose() {
+    const isFormDirty = computeIsFormDirty();
+  
+    handleFilterOverlayClose(
+      [minFameRating, maxFameRating],
+      [minAge, maxAge],
+      selectedInterests,
+      maxDistanceKm,
+      sortBy,
+      isFormDirty
+    );
+  }
+  
 
-    function handleFameRatingFilterApply(minFameRating: number, maxFameRating: number) {
-        setMinFameRating(minFameRating);
-        setMaxFameRating(maxFameRating);
-    }
+  // filter handlers
+  function handleFameRatingFilterApply(min: number, max: number) {
+    setMinFameRating(min);
+    setMaxFameRating(max);
+  }
 
-    function handleinterestsFilterApply(newSelectedInterests: Set<string>) {
-        setSelectedInterests(new Set(newSelectedInterests));
-        console.log('saved:')
-        console.log(newSelectedInterests);
-    }
+  function handleInterestsFilterApply(newSelectedInterests: Set<string>) {
+    setSelectedInterests(new Set(newSelectedInterests));
+  }
 
-    function handleAgeGapFilterApply(newMinAge: number, newMaxAge: number) {
-        setMinAge(newMinAge);
-        setMaxAge(newMaxAge);
-    }
+  function handleAgeGapFilterApply(newMin: number, newMax: number) {
+    setMinAge(newMin);
+    setMaxAge(newMax);
+  }
 
-    return (
-        <div onClick={handleBackgroundClick} className="fixed z-30 flex justify-center items-center inset-0 bg-black bg-opacity-40">
-            <div className="bg-white overflow-y-auto rounded-18px flex flex-col h-full w-550px overlay-slide" style={{maxHeight: 813}}>
-                <div className="flex justify-between items-center w-full mt-4 mb-4">
-                    <h2 style={{ fontSize: '30px' }} className="ml-5">Filters</h2>
-                    <img
-                        src="/icons/overlay-cross-icon.svg"
-                        alt="cross icon"
-                        className="cursor-pointer mr-5"
-                        width={44}
-                        height={44}
-                        onClick={handleClose}
-                    />
-                </div>
-                <hr className="divider"></hr>
-                <div className="ml-4 flex flex-col gap-10 mt-4">
-                    <div>
-                        <h3 style={{fontSize: 23, fontWeight: 'bold'}} className="mb-2">Filter by Fame Rating:</h3>
-                        <div className="flex flex-col gap-4 ml-4">
-                            <FameRatingFilter minFameRatingProp={minFameRating} maxFameRatingProp={maxFameRating} handleFilterApply={handleFameRatingFilterApply}/>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 style={{fontSize: 23, fontWeight: 'bold'}} className="mb-4">Filter by Interests:</h3>
-                        <InterestsInput initialySelectedInterests={selectedInterests} handleInterestsSave={handleinterestsFilterApply}/>
-                    </div>
-                    <div>
-                        <h3 style={{fontSize: 23, fontWeight: 'bold'}} className="mb-4">Filter by Age:</h3>
-                        <AgeGapFilter initialMinAge={minAge} initialMaxAge={maxAge} handleAgeGapFilterApply={handleAgeGapFilterApply}/>
-                    </div>
-                </div>
-            </div>
+  function handleGeoLocationFilterApply(distanceKm: number) {
+    setMaxDistanceKm(distanceKm);
+  }
+
+  return (
+    <div
+      onClick={handleBackgroundClick}
+      className="fixed z-30 flex justify-center items-center inset-0 bg-black bg-opacity-40"
+    >
+      <div
+        className="bg-white overflow-y-auto rounded-18px flex flex-col h-full w-full max-w-[550px] overlay-slide"
+        style={{ maxHeight: 813 }}
+      >
+        {/* Header */}
+        <div className="flex justify-between items-center w-full mt-4 mb-4 px-5">
+          <h2 style={{ fontSize: 30 }}>Filters</h2>
+          <img
+            src="/icons/overlay-cross-icon.svg"
+            alt="cross icon"
+            className="cursor-pointer"
+            width={44}
+            height={44}
+            onClick={handleClose}
+          />
         </div>
-    )
+
+        <hr className="divider" />
+
+        {/* Sort Dropdown */}
+        <div className="ml-4 mt-4 mb-6">
+          <label className="block mb-2 font-bold text-lg" htmlFor="sortBy">
+            Sort by:
+          </label>
+            <div className="relative w-full max-w-xs">
+            <select
+                id="sortBy"
+                className="block w-full appearance-none bg-white border border-gray-300 rounded-xl px-4 py-2 pr-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={sortBy || ""}
+                onChange={(e) => {
+                const value = e.target.value;
+                setSortBy(value === "" ? null : (value as SortOption));
+                }}
+            >
+                <option value="">None</option>
+                <option value="fame">Fame Rating</option>
+                <option value="age">Age</option>
+                <option value="distance">Distance</option>
+                <option value="interests">Interests</option>
+            </select>
+
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                <svg
+                className="h-5 w-5 text-gray-400"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                >
+                <path
+                    fillRule="evenodd"
+                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.063a.75.75 0 111.08 1.04l-4.25 4.65a.75.75 0 01-1.08 0l-4.25-4.65a.75.75 0 01.02-1.06z"
+                    clipRule="evenodd"
+                />
+                </svg>
+            </div>
+            </div>
+
+        </div>
+
+        {/* Filters */}
+        <div className="ml-4 flex flex-col gap-10 mt-4 pb-6">
+          <div>
+            <h3 style={{ fontSize: 23, fontWeight: "bold" }} className="mb-2">
+              Filter by Fame Rating:
+            </h3>
+            <div className="flex flex-col gap-4 ml-4">
+              <FameRatingFilter
+                minFameRatingProp={minFameRating}
+                maxFameRatingProp={maxFameRating}
+                handleFilterApply={handleFameRatingFilterApply}
+              />
+            </div>
+          </div>
+
+          <div>
+            <h3 style={{ fontSize: 23, fontWeight: "bold" }} className="mb-4">
+              Filter by Interests:
+            </h3>
+            <InterestsInput
+              initialySelectedInterests={selectedInterests}
+              handleInterestsSave={handleInterestsFilterApply}
+            />
+          </div>
+
+          <div>
+            <h3 style={{ fontSize: 23, fontWeight: "bold" }} className="mb-4">
+              Filter by Age:
+            </h3>
+            <AgeGapFilter
+              initialMinAge={minAge}
+              initialMaxAge={maxAge}
+              handleAgeGapFilterApply={handleAgeGapFilterApply}
+            />
+          </div>
+
+          <div>
+            <h3 style={{ fontSize: 23, fontWeight: "bold" }} className="mb-4">
+              Filter by Distance:
+            </h3>
+            <GeoLocationFilter
+              initialMaxDistanceKm={maxDistanceKm}
+              handleGeoLocationFilterApply={handleGeoLocationFilterApply}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default FilterOverlay;

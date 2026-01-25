@@ -14,3 +14,8 @@ export type UserEvent = {
 }
 
 export type CreateUserEvent = Omit<UserEvent, "createdAt" | "id" | "canRespond">
+
+export type EventResponsePayload = {
+    eventId: number;
+    action: "accept" | "decline" | "cancel";
+}

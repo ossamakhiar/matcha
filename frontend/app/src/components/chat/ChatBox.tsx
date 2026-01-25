@@ -3,13 +3,13 @@ import Message from "./Message";
 import { useEffect, useRef, useState } from "react";
 import { useMessages } from "../../context/messagesProvider";
 import { useActiveDm } from "../../context/activeDmProvider";
-import { monthAndDayAndTimeDateFormat, getFormattedTime } from "../../utils/dateFormatter";
+import { monthAndDayAndTimeDateFormat } from "../../utils/dateFormatter";
 
 
 const   ChatBox = () => {
     const {activeDmId} = useActiveDm();
     const chatBoxRef = useRef<HTMLDivElement>(null);
-    const { messages, fetchMoreMessages, hasMore } = useMessages();
+    const { messages, fetchMoreMessages, hasMore, onEventAccept, onEventDecline, onEventCancel } = useMessages();
     // ! too many boolean state which might be indicating same state?
     const [shouldScrollDown, setShouldScrollDown] = useState<boolean>(true);
     const [showScrollButton, setShowScrollButton] = useState<boolean>(false); // ? this will be true if the user viewing older messages
@@ -83,6 +83,9 @@ const   ChatBox = () => {
                                         <Message
                                             key={message.messageId}
                                             message={message}
+                                            onEventAccept={onEventAccept}
+                                            onEventDecline={onEventDecline}
+                                            onEventCancel={onEventCancel}
                                         />
                                     </div>
                                 )

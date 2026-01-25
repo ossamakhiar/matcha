@@ -4,11 +4,11 @@ import { AiOutlineAudio } from "react-icons/ai";
 import { IoSend } from "react-icons/io5";
 import { useSocket } from "../../context/SocketProvider";
 import useRecorder from "../../hooks/useRecorder";
-import { EventMessageContent, EventsEnum } from "../../types";
+import { EventsEnum } from "../../types";
 import { BsTrash3Fill } from "react-icons/bs";
 import ChatComposerActions from "./ChatComposerActions";
 import { Modal } from "../utils/Modal";
-import { CreateEventForm } from "./CreateEventForm";
+import { CreateEventForm, CreateEventPayload } from "./CreateEventForm";
 
 enum MessageType {
     TEXT = "text",
@@ -32,7 +32,7 @@ type AudioMessagePayload = BaseOutgoingMessagePayload & {
 
 type EventMessagePayload = BaseOutgoingMessagePayload & {
     type: MessageType.EVENT;
-    content: EventMessageContent;
+    content: CreateEventPayload;
 };
 
 type OutgoingMessagePayload =
@@ -173,6 +173,7 @@ const   ChatInputField = ({onSend}: {onSend: () => void}) => {
                         });
 
                         setIsEventOpen(false);
+                        onSend();
                     }}
                 />
             </Modal>

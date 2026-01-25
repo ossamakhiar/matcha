@@ -7,6 +7,7 @@ type Props = {
     sentAt: string;
     onAccept?: (eventId: number) => void;
     onDecline?: (eventId: number) => void;
+    onCancel?: (eventId: number) => void;
   };
   
   export const EventMessage: FC<Props> = ({
@@ -15,6 +16,7 @@ type Props = {
     sentAt,
     onAccept,
     onDecline,
+    onCancel,
   }) => {
     const date = new Date(content.eventDate);
   
@@ -42,33 +44,48 @@ type Props = {
         )}
   
         <div className="mt-3 flex items-center justify-between">
-          {content.canRespond ? (
-            <div className="flex gap-2">
+          {content.eventStatus === "proposed" ? (
+            isSender ? (
               <button
-                onClick={() => onAccept?.(content.id)}
-                className="px-3 py-1 text-sm rounded-md bg-green-600 text-white hover:bg-green-700"
+                onClick={() => onCancel?.(content.id)}
+                className="px-3 py-1 text-sm rounded-md bg-orange-600 text-white hover:bg-orange-700"
               >
-                Accept
+                Cancel
               </button>
-              <button
-                onClick={() => onDecline?.(content.id)}
-                className="px-3 py-1 text-sm rounded-md bg-red-600 text-white hover:bg-red-700"
-              >
-                Decline
-              </button>
-            </div>
+            ) : content.canRespond ? (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => onAccept?.(content.id)}
+                  className="px-3 py-1 text-sm rounded-md bg-green-600 text-white hover:bg-green-700"
+                >
+                  Accept
+                </button>
+                <button
+                  onClick={() => onDecline?.(content.id)}
+                  className="px-3 py-1 text-sm rounded-md bg-red-600 text-white hover:bg-red-700"
+                >
+                  Decline
+                </button>
+              </div>
+            ) : (
+              <span className="text-xs font-medium px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">
+                Awaiting response
+              </span>
+            )
           ) : (
             <span
               className={`text-xs font-medium px-2 py-1 rounded-full
               ${
-                content.status === "accepted"
+                content.eventStatus === "accepted"
                   ? "bg-green-100 text-green-700"
-                  : content.status === "declined"
+                  : content.eventStatus === "declined"
                   ? "bg-red-100 text-red-700"
+                  : content.eventStatus === "cancelled"
+                  ? "bg-orange-100 text-orange-700"
                   : "bg-gray-100 text-gray-600"
               }`}
             >
-              {content.status}
+              {content.eventStatus}
             </span>
           )}
   

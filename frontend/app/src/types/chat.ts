@@ -42,11 +42,11 @@ export type EventStatus =
     | "cancelled";
 
 export type EventMessageContent = {
+    id: number;
     title: string;
     eventDate: string;
-    status?: EventStatus;
+    eventStatus?: EventStatus;
     notes?: string;
-    id?: number;
     canRespond?: boolean;
 };
 

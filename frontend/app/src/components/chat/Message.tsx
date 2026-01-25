@@ -2,7 +2,12 @@ import { FC } from "react";
 import { MessageType } from "../../types";
 import { EventMessage } from "./EventMessage";
 
-const Message: FC<{ message: MessageType }> = ({ message }) => {
+const Message: FC<{ 
+    message: MessageType; 
+    onEventAccept?: (eventId: number) => void; 
+    onEventDecline?: (eventId: number) => void;
+    onEventCancel?: (eventId: number) => void;
+}> = ({ message, onEventAccept, onEventDecline, onEventCancel }) => {
     const { isSender, sentAt } = message;
 
     return (
@@ -35,6 +40,9 @@ const Message: FC<{ message: MessageType }> = ({ message }) => {
                         content={message.content}
                         isSender={isSender}
                         sentAt={sentAt}
+                        onAccept={onEventAccept}
+                        onDecline={onEventDecline}
+                        onCancel={onEventCancel}
                     />
             }
         </div>

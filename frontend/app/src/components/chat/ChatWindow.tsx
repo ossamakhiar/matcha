@@ -10,6 +10,7 @@ import MessagesProvider from "../../context/messagesProvider";
 import useFetch from "../../hooks/useFetch";
 import usePaginatedFetch from "../../hooks/usePaginatedFetch";
 import { sendLoggedInActionRequest } from "../../utils/httpRequests";
+import { useSocket } from "../../context/SocketProvider";
 
 // function   
 
@@ -80,9 +81,30 @@ function registerEventHandlers(
         });
     };
 
+    const eventStatusUpdateHandler = (data: { eventId: number; status: string; messageId: number }) => {
+        setMessages((prev) => {
+            if (!prev) return prev;
+
+            return prev.map((msg) => {
+                if (msg.messageType === "event" && msg.content.id === data.eventId) {
+                    return {
+                        ...msg,
+                        content: {
+                            ...msg.content,
+                            eventStatus: data.status as any,
+                            canRespond: false,
+                        },
+                    };
+                }
+                return msg;
+            });
+        });
+    };
+
     const registrarFunction = prepareSocketEventRegistration([
         [EventsEnum.CHAT_RECEIVE, messageReceivedHandler],
         [EventsEnum.GLOBAL_PRESENCE, selectedConversationPresenceHandler],
+        [EventsEnum.EVENT_STATUS_UPDATE, eventStatusUpdateHandler],
     ]);
 
     useSocketEventRegister(registrarFunction, [activeDmId]);
@@ -91,11 +113,13 @@ function registerEventHandlers(
 
 
 const ChatWindow = () => {
+    const   socket = useSocket();
     const   {activeDmId} = useActiveDm();
     const   messages = usePaginatedFetch<MessageType>(`${import.meta.env.VITE_LOCAL_CHAT_DMS}/${activeDmId}`);
     const   [participant, setParticipant] = useFetch<ParticipantUser>(`${import.meta.env.VITE_LOCAL_CHAT_DM_PARTICIPANT}/${activeDmId}`);
 
     registerEventHandlers(messages.setData, setParticipant);
+    
     const   handleFavoriteClick = async (conversationId: number) => {
         setParticipant((prev) => {
             if (!prev)
@@ -114,6 +138,18 @@ const ChatWindow = () => {
         }
     }
 
+    const handleEventAccept = (eventId: number) => {
+        socket?.emit(EventsEnum.EVENT_RESPOND, { eventId, action: 'accept' });
+    };
+
+    const handleEventDecline = (eventId: number) => {
+        socket?.emit(EventsEnum.EVENT_RESPOND, { eventId, action: 'decline' });
+    };
+
+    const handleEventCancel = (eventId: number) => {
+        socket?.emit(EventsEnum.EVENT_RESPOND, { eventId, action: 'cancel' });
+    };
+
     const   reversed_data = [...(messages.data || [])].reverse();
 
     return (
@@ -123,7 +159,10 @@ const ChatWindow = () => {
                     messages: reversed_data,
                     setMessages: messages.setData,
                     fetchMoreMessages: messages.fetchMoreData,
-                    hasMore: messages.hasMore
+                    hasMore: messages.hasMore,
+                    onEventAccept: handleEventAccept,
+                    onEventDecline: handleEventDecline,
+                    onEventCancel: handleEventCancel,
                 }
             }
         >

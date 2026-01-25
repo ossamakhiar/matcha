@@ -228,7 +228,7 @@ export async function getChatHistory(userId: number, participantId: number, page
                     title: chat.event_title,
                     eventDate: chat.event_date,
                     notes: chat.event_notes,
-                    status: chat.event_status,
+                    eventStatus: chat.event_status,
                     canRespond: chat.can_respond,
                 };
             }

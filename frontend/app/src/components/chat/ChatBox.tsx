@@ -75,7 +75,6 @@ const   ChatBox = () => {
                         }
                         {
                             messages.map((message, index, arr) => {
-                                const   isAudio = message.messageType === 'audio';
                                 return (
                                     <div
                                         key={message.sentAt} // ! add the id of the message instead of the array index
@@ -83,10 +82,7 @@ const   ChatBox = () => {
                                         >
                                         <Message
                                             key={message.messageId}
-                                            message={message.messageContent}
-                                            sentAt={getFormattedTime(message.sentAt)}
-                                            isSender={message.isSender}
-                                            isAudio={isAudio}
+                                            message={message}
                                         />
                                     </div>
                                 )

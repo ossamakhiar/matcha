@@ -1,6 +1,6 @@
 -- TYPES
 CREATE TYPE MESSAGE_STATUS AS ENUM ('unread', 'read');
-CREATE TYPE EVENT_STATUS AS ENUM("proposed", "accepted", "declined", "cancelled")
+CREATE TYPE EVENT_STATUS AS ENUM('proposed', 'accepted', 'declined', 'cancelled');
 
 -- SCHEMA
 CREATE TABLE "user" (
@@ -68,22 +68,22 @@ CREATE TABLE history (
     FOREIGN KEY (visited_id) REFERENCES "user" (id) ON DELETE CASCADE
 );
 
-CREATE TABLE event {
+CREATE TABLE "event" (
     id SERIAL PRIMARY KEY,
-    creator_id INTEGER NOT NULL,
+    creator_id INTEGER,
     title VARCHAR(255) NOT NULL,
     event_date TIMESTAMP NOT NULL,
     notes TEXT NULL,
-    event_status EVENT_STATUS DEFAULT 'proposed'
+    event_status EVENT_STATUS DEFAULT 'proposed',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (creator_id) REFERENCES "user" (id) ON DELETE SET NULL
-};
+);
 
 CREATE TABLE dm (
     id SERIAL PRIMARY KEY,
-    sender_id INTEGER NOT NULL,
-    receiver_id INTEGER NOT NULL,
+    sender_id INTEGER,
+    receiver_id INTEGER,
     content_type VARCHAR(255) NOT NULL CHECK(content_type IN ('text', 'audio', 'event')), 
 
     content TEXT NULL,
@@ -93,8 +93,8 @@ CREATE TABLE dm (
     sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (sender_id) REFERENCES "user" (id) ON DELETE SET NULL,
-    FOREIGN KEY (receiver_id) REFERENCES "user" (id) ON DELETE SET NULL
-    FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE SET NULL,
+    FOREIGN KEY (receiver_id) REFERENCES "user" (id) ON DELETE SET NULL,
+    FOREIGN KEY (event_id) REFERENCES "event" (id) ON DELETE SET NULL,
 
     CONSTRAINT dm_content_or_event_check CHECK (
         (content_type IN ('text', 'audio') AND content IS NOT NULL and event_id IS NULL)

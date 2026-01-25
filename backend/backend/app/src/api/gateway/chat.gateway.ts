@@ -68,11 +68,10 @@ async function persistMessage(
         eventId: event.id,
       });
 
-      console.log(event)
       return {
         id: row.id,
         messageType: "event",
-        messageContent: event,
+        messageContent: {...event, canRespond: true},
         sentAt: row.sentAt,
       };
     }

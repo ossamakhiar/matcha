@@ -1,6 +1,6 @@
 import ChatBox from "./ChatBox";
 import ConversationHeader from "./ConversationHeader";
-import { EventsEnum, MessageType, ParticipantUser } from "../../types";
+import { EventsEnum, IncomingMessagePayload, MessageType, ParticipantUser } from "../../types";
 import { Dispatch, SetStateAction } from "react";
 import eventObserver from "../../utils/eventObserver";
 import { useActiveDm } from "../../context/activeDmProvider";
@@ -13,47 +13,77 @@ import { sendLoggedInActionRequest } from "../../utils/httpRequests";
 
 // function   
 
-type ChatIncomingPayload = {from: number} & MessageType;
+function mapIncomingToMessage(
+    message: IncomingMessagePayload & { messageId: number }
+): MessageType {
+    if (message.messageType === "text") {
+        return {
+            messageId: message.messageId,
+            isSender: message.isSender,
+            sentAt: message.sentAt,
+            messageType: "text",
+            content: message.messageContent, // string
+        };
+    }
 
+    if (message.messageType === "audio") {
+        return {
+            messageId: message.messageId,
+            isSender: message.isSender,
+            sentAt: message.sentAt,
+            messageType: "audio",
+            content: message.messageContent, // string (URL)
+        };
+    }
 
-function    registerEventHandlers(setMessages: Dispatch<SetStateAction<any[] | undefined>>, setParticipant: Dispatch<SetStateAction<ParticipantUser | undefined>>) {
-    const   { activeDmId } = useActiveDm();
+    // must be event
+    return {
+        messageId: message.messageId,
+        isSender: message.isSender,
+        sentAt: message.sentAt,
+        messageType: "event",
+        content: message.messageContent, // EventMessageContent
+    };
+}
 
-    const   messageReceivedHandler = (message: ChatIncomingPayload) => {
-        console.log(message);
+function registerEventHandlers(
+    setMessages: Dispatch<SetStateAction<MessageType[] | undefined>>,
+    setParticipant: Dispatch<SetStateAction<ParticipantUser | undefined>>
+) {
+    const { activeDmId } = useActiveDm();
 
+    const messageReceivedHandler = (
+        message: IncomingMessagePayload & { messageId: number }
+    ) => {
         if (message.from === activeDmId || message.isSender) {
             setMessages((prev) => {
-                if (!prev)
-                    return (prev);
+                if (!prev) return prev;
+
                 return [
-                    {
-                        id: message.messageId,
-                        isSender: message.isSender,
-                        sentAt: message.sentAt,
-                        messageType: message.messageType,
-                        messageContent: message.messageContent
-                    },
-                    ...prev 
-                ]
+                    mapIncomingToMessage(message),
+                    ...prev,
+                ];
             });
-            // !!!!!!!!! emit that the message read
+
+            // TODO: emit message-read event
         }
-    }
+    };
 
     const selectedConversationPresenceHandler = (onlineUsers: number[]) => {
-        const status = onlineUsers.includes(activeDmId) ? 'online' : 'offline';
-        setParticipant((prev) => {
-            if (!prev || status === prev.status)
-                return (prev);
-            return {...prev, status}
-        })
-    }
+        const status = onlineUsers.includes(activeDmId)
+            ? "online"
+            : "offline";
 
-    const   registrarFunction = prepareSocketEventRegistration([
-            [EventsEnum.CHAT_RECEIVE, messageReceivedHandler],
-            [EventsEnum.GLOBAL_PRESENCE, selectedConversationPresenceHandler],
-        ])
+        setParticipant((prev) => {
+            if (!prev || prev.status === status) return prev;
+            return { ...prev, status };
+        });
+    };
+
+    const registrarFunction = prepareSocketEventRegistration([
+        [EventsEnum.CHAT_RECEIVE, messageReceivedHandler],
+        [EventsEnum.GLOBAL_PRESENCE, selectedConversationPresenceHandler],
+    ]);
 
     useSocketEventRegister(registrarFunction, [activeDmId]);
 }

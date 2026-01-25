@@ -148,7 +148,7 @@ export async function retrieveDms(userId: number) {
             firstName: dm.first_name,
             lastName: dm.last_name,
             messageType: dm.content_type,
-            lastMessage: dm.content,
+            lastMessage: dm.content_type === 'event' ? "" : dm.content,
             unreadCount: Number(dm.unread_count),
             status: isUserOnline(dm.id) ? 'online' : 'offline',
             profilePicture: dm.profile_picture ? process.env.BASE_URL as string + '/' + dm.profile_picture : process.env.DEFAULT_PROFILE_PICTURE as string,
@@ -177,20 +177,37 @@ export async function getChatHistory(userId: number, participantId: number, page
     // ! add dms offset in the api call
     const   query = `
             SELECT
-                id,
-                content_type,
-                content,
-                sent_at,
+                d.id,
+                d.content_type,
+                d.content,
+                d.sent_at,
+
+                e.id           AS event_id,
+                e.title        AS event_title,
+                e.event_date   AS event_date,
+                e.notes        AS event_notes,
+                e.event_status AS event_status,
+
                 CASE
-                    WHEN sender_id = $1 THEN true
+                    WHEN d.sender_id = $1 THEN true
                     ELSE false
-                END AS is_sender
-            FROM "dm"
+                END AS is_sender,
+
+                CASE
+                    WHEN d.receiver_id = $1
+                    AND e.event_status = 'proposed'
+                    THEN true
+                    ELSE false
+                END AS can_respond
+
+            FROM dm d
+            LEFT JOIN event e
+                ON e.id = d.event_id
             WHERE
-                (receiver_id, sender_id) IN (($1, $2), ($2, $1))
-            ORDER BY sent_at DESC
+                (d.receiver_id, d.sender_id) IN (($1, $2), ($2, $1))
+            ORDER BY d.sent_at DESC
             LIMIT $3
-            OFFSET $4
+            OFFSET $4;
         `
 
     const offset = (page * pageSize);
@@ -198,16 +215,36 @@ export async function getChatHistory(userId: number, participantId: number, page
 
     try {
         const results = await client.query(query, [userId, participantId, limit, offset]);
+
+        return results.rows.map((chat) => {
+            let content = null;
+
+            if (chat.content_type === 'text')
+                content = chat.content;
+            
+            if (chat.content_type === 'event') {
+                content = {
+                    id: chat.event_id,
+                    title: chat.event_title,
+                    eventDate: chat.event_date,
+                    notes: chat.event_notes,
+                    status: chat.event_status,
+                    canRespond: chat.can_respond,
+                };
+            }
+
+            if (chat.content_type === 'audio')
+                content = `${process.env.BASE_URL}/${chat.content}`;
         
-        // console.log(results.rows);
-        return (results.rows.map((chat) => ({
+        
+            return {
                 id: chat.id,
                 isSender: chat.is_sender,
                 messageType: chat.content_type,
-                messageContent: chat.content_type === 'text' ? chat.content : process.env.BASE_URL + '/' + chat.content,
+                content,
                 sentAt: chat.sent_at,
-            })
-        ));
+            };
+        });
     } catch (e) {
         throw e;
     } finally {
@@ -278,21 +315,6 @@ export async function getParticipantInfoById(userId: number, participantId: numb
         WHERE u.id = $2;
     `
 
-    /*
-        SELECT
-            u.id,
-            username,
-            first_name,
-            last_name,
-            profile_picture,
-            EXISTS (
-                SELECT 1
-                FROM "user_favorite_contacts"
-                WHERE user_id = $1 AND favorite_user_id = $2
-            ) AS is_favorite
-        FROM "user" u
-        WHERE u.id = $2;
-    */
 
     const client = await pool.connect();
     try {
@@ -313,12 +335,6 @@ export async function getParticipantInfoById(userId: number, participantId: numb
         client.release();
     }
 }
-
-// export async function getFavoriteUsers(userId: number) {
-//     // select * from favorites WHERE user_id = userId JOIN with users on favorite_user_id = users.id
-
-//     return dummyDms.filter((value) => value.isFavorite);
-// }
 
 
 export  async function markMessagesAsReadService(userId: number, participantId: number) {

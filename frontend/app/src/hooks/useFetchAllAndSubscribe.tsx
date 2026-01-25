@@ -13,61 +13,87 @@ import { EventsEnum } from "../types";
 // type    StatePair = [DmListType[] | undefined, React.Dispatch<React.SetStateAction<DmListType[] | undefined>>];
 type    ReactSetter<T> = Dispatch<SetStateAction<T>>
 
+function createDmsUpdateFunc(
+    activeDmId: number,
+    data: IncomingMessagePayload
+) {
 
-
-// ! refactor this function, bunch of repeated code part
-function createDmsUpdateFunc(activeDmId: number, data: IncomingMessagePayload) {
-    return (prevDms: DmListType[] | undefined): DmListType[] | undefined => {
+    return (
+        prevDms: DmListType[] | undefined
+    ): DmListType[] | undefined => {
         if (!prevDms) return;
 
-        
+        // ─── SENT BY CURRENT USER ─────────────────────────────
         if (data.isSender) {
             const index = prevDms.findIndex((dm) => dm.id === data.to);
+
             if (index !== -1) {
-                const updatedDm = { ...prevDms[index], lastMessage: data.messageContent, messageType: data.messageType, isSender: true };
-                return [updatedDm, ...prevDms.slice(0, index), ...prevDms.slice(index + 1)];
+                const updatedDm: DmListType = {
+                    ...prevDms[index],
+                    lastMessage: String(data.messageContent),
+                    messageType: data.messageType,
+                    isSender: true,
+                };
+
+                return [
+                    updatedDm,
+                    ...prevDms.slice(0, index),
+                    ...prevDms.slice(index + 1),
+                ];
             }
 
             const newDm: DmListType = {
                 id: data.to,
                 firstName: data.firstName,
                 lastName: data.lastName,
-                lastMessage: data.messageContent,
-                messageType: data.messageType,
                 profilePicture: data.profilePicture,
                 isFavorite: data.isFavorite,
                 status: data.status,
+                lastMessage: String(data.messageContent),
+                messageType: data.messageType,
                 unreadCount: 0,
                 isSender: true,
             };
+
             return [newDm, ...prevDms];
         }
 
+        // ─── RECEIVED MESSAGE ─────────────────────────────────
         const index = prevDms.findIndex((dm) => dm.id === data.from);
+
         if (index !== -1) {
-            const unreadCount = prevDms[index].unreadCount + (activeDmId === data.from ? 0 : 1);
-            const updatedDm = {
+            const unreadCount =
+                prevDms[index].unreadCount +
+                (activeDmId === data.from ? 0 : 1);
+
+            const updatedDm: DmListType = {
                 ...prevDms[index],
+                lastMessage: String(data.messageContent),
                 messageType: data.messageType,
-                lastMessage: data.messageContent,
                 unreadCount,
                 isSender: false,
             };
-            return [updatedDm, ...prevDms.slice(0, index), ...prevDms.slice(index + 1)];
+
+            return [
+                updatedDm,
+                ...prevDms.slice(0, index),
+                ...prevDms.slice(index + 1),
+            ];
         }
 
         const newMessage: DmListType = {
             id: data.from,
             firstName: data.firstName,
             lastName: data.lastName,
-            messageType: data.messageType,
-            lastMessage: data.messageContent,
             profilePicture: data.profilePicture,
             isFavorite: data.isFavorite,
             status: data.status,
+            lastMessage: String(data.messageContent),
+            messageType: data.messageType,
             unreadCount: 1,
             isSender: false,
         };
+
         return [newMessage, ...prevDms];
     };
 }

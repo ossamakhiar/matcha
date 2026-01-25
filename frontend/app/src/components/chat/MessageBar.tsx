@@ -1,16 +1,19 @@
-import { DmListType } from "../../types";
+import { DmListType, MessageKind } from "../../types";
 
 // Dm bar
-function formatMessage(messageType: 'text' | 'audio', message: string, isSender: boolean) {
+function formatMessage(messageType: MessageKind, message: string, isSender: boolean) {
     let displayedMessage = message; 
-    if (messageType === 'audio')
-        displayedMessage = 'audio message 🎙';
-    
+    console.log(messageType)
+    if (messageType === "event")
+        return `📅 event proposal`;
+
+    if (messageType === "audio") 
+        return "🎤 Voice message";
+
     return `${isSender ? 'You: ' : ''}${displayedMessage}`;
 }
 
 const   MessageBar = (props: DmListType) => {
-
     return (
         <div className="w-full p-1 h-20 flex items-center gap-2  hover:bg-gray-200 cursor-pointer">
             <div className="relative">
@@ -30,10 +33,8 @@ const   MessageBar = (props: DmListType) => {
                     {`${props.firstName} ${props.lastName}`}
                 </h1>
                 {
-                    props.lastMessage &&
+                    props.lastMessage !== undefined &&
                     <p className="text-gray-500 truncate text-sm">
-                        {/* {props.isSender && "You: "}
-                        {props.lastMessage} */}
                         {formatMessage(props.messageType, props.lastMessage, props.isSender)}
                     </p>
                 }

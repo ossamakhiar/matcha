@@ -9,7 +9,8 @@ export type UserEvent = {
     eventStatus?: EventStatus,
     notes?: string,
     creatorId: number,
-    createdAt: string
+    createdAt: string,
+    canRespond: boolean
 }
 
-export type CreateUserEvent = Omit<UserEvent, "createdAt" | "id">
+export type CreateUserEvent = Omit<UserEvent, "createdAt" | "id" | "canRespond">

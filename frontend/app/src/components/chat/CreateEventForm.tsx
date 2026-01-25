@@ -2,8 +2,8 @@ import React, { useState } from "react";
 
 export type CreateEventPayload = {
   title: string;
-  startsAtISO: string;
-  note?: string;
+  eventDate: string;
+  notes?: string;
 };
 
 type Props = {
@@ -25,11 +25,11 @@ export const CreateEventForm: React.FC<Props> = ({
     const handleSubmit = () => {
         if (!canSubmit) return;
 
-        const startsAtISO = new Date(`${date}T${time}`).toISOString();
+        const eventDate = new Date(`${date}T${time}`).toISOString();
         onSubmit({
             title: title.trim() || defaultTitle,
-            startsAtISO,
-            note: note.trim() ? note.trim() : undefined,
+            eventDate,
+            notes: note.trim() ? note.trim() : undefined,
         });
     }
 

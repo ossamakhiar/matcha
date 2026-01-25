@@ -5,8 +5,11 @@ import { MessageType } from "../types";
 type    MessageContextType = {
     messages: MessageType[],
     setMessages: Dispatch<SetStateAction<MessageType[] | undefined>>,
-    fetchMoreMessages: () => void;
+    fetchMoreMessages: () => Promise<void>;
     hasMore: boolean;
+    onEventAccept?: (eventId: number) => void;
+    onEventDecline?: (eventId: number) => void;
+    onEventCancel?: (eventId: number) => void;
 }
 
 const MessagesContext = createContext<MessageContextType>({} as MessageContextType);

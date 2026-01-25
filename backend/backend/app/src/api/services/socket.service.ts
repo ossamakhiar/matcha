@@ -1,7 +1,7 @@
 import { Socket } from "socket.io";
 import { getApplicationError } from "../helpers/getErrorObject.js";
 import socketManager from "./socketManager.service.js";
-import { IDirectMessage, IUserBrief, OutgoingMessagePayload } from "../types/chat.type.js";
+import { IUserBrief, OutgoingMessagePayload, PresentedDm } from "../types/chat.type.js";
 import ioEmitter from "./emitter.service.js";
 import { INotification } from "../types/notification.type.js";
 
@@ -36,10 +36,16 @@ export function isUserOnline(userId: number) {
 
 
 // ! back to this
-export function emitChatMessageEvent(senderId: number, receiverId: number, isSender: boolean, createdDm: IDirectMessage, user: IUserBrief) {
-    const   {id, firstName, lastName, profilePicture, status } = user;
+export function emitChatMessageEvent(
+  senderId: number,
+  receiverId: number,
+  isSender: boolean,
+  createdDm: PresentedDm,
+  user: IUserBrief
+) {
+    const { firstName, lastName, profilePicture, status } = user;
 
-    const   outgoingMessage: OutgoingMessagePayload = {
+    const base = {
         from: senderId,
         to: receiverId,
         isSender,
@@ -48,49 +54,23 @@ export function emitChatMessageEvent(senderId: number, receiverId: number, isSen
         profilePicture,
         status,
         messageId: createdDm.id,
-        messageType: createdDm.messageType,
-        messageContent: createdDm.messageContent,
         sentAt: createdDm.sentAt,
-    }
+    };
 
-    ioEmitter.emitToClientSockets(isSender ? senderId : receiverId, 'chat:message', outgoingMessage);
+    const outgoingMessage: OutgoingMessagePayload =
+    createdDm.messageType === "text"
+        ? { ...base, messageType: "text", messageContent: createdDm.messageContent }
+        : createdDm.messageType === "audio"
+        ? { ...base, messageType: "audio", messageContent: createdDm.messageContent }
+        : { ...base, messageType: "event", messageContent: createdDm.messageContent };
+
+    ioEmitter.emitToClientSockets(
+        isSender ? senderId : receiverId,
+        "chat:message",
+        outgoingMessage
+    );
 }
 
 export function emitNotificationEvent(notifierId: number, notification: INotification) {
     ioEmitter.emitToClientSockets(notifierId, 'notification:new', notification)
 }
-
-
-
-// export function emitNotificationEvent(notifificationType: string, notifierId: number, actorUser: IUserBrief) {
-//     const   notifications = {
-//         new_message: 
-//     }
-//     const   notification = 
-
-//     ioEmitter.emitToClientSockets(notifierId, 'notification:new', {
-//         id: Math.floor(Math.random() * 1000),
-//         type: 'new_message',
-//         title: 'New Message',
-//         message: `You have received a new message from ${senderBrief?.firstName} ${senderBrief?.lastName}`,
-//         actorId: senderId,
-//         profilePicture: senderBrief?.profilePicture,
-//         senderFirstName: senderBrief?.firstName,
-//         senderLastName: senderBrief?.lastName,
-//         read: false
-//     })
-// }
-
-
-// class Notification {
-//     private notificationType: string;
-//     private notificaitonTitle: string;
-//     private notificationMessage: string;
-//     private notifierId: number;
-//     private actorUser: IUserBrief;
-
-//     constructor(type: string, title: string, message: string, notifierId: number, actorUser: string) {
-
-//     }
-// }
-

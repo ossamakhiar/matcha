@@ -13,62 +13,87 @@ import { EventsEnum } from "../types";
 // type    StatePair = [DmListType[] | undefined, React.Dispatch<React.SetStateAction<DmListType[] | undefined>>];
 type    ReactSetter<T> = Dispatch<SetStateAction<T>>
 
+function createDmsUpdateFunc(
+    activeDmId: number,
+    data: IncomingMessagePayload
+) {
 
-
-// ! refactor this function, bunch of repeated code part
-function createDmsUpdateFunc(activeDmId: number, data: IncomingMessagePayload) {
-    return (prevDms: DmListType[] | undefined): DmListType[] | undefined => {
+    return (
+        prevDms: DmListType[] | undefined
+    ): DmListType[] | undefined => {
         if (!prevDms) return;
 
-        // console.log(data);
-        
+        // ─── SENT BY CURRENT USER ─────────────────────────────
         if (data.isSender) {
             const index = prevDms.findIndex((dm) => dm.id === data.to);
+
             if (index !== -1) {
-                const updatedDm = { ...prevDms[index], lastMessage: data.messageContent, messageType: data.messageType, isSender: true };
-                return [updatedDm, ...prevDms.slice(0, index), ...prevDms.slice(index + 1)];
+                const updatedDm: DmListType = {
+                    ...prevDms[index],
+                    lastMessage: String(data.messageContent),
+                    messageType: data.messageType,
+                    isSender: true,
+                };
+
+                return [
+                    updatedDm,
+                    ...prevDms.slice(0, index),
+                    ...prevDms.slice(index + 1),
+                ];
             }
 
             const newDm: DmListType = {
                 id: data.to,
                 firstName: data.firstName,
                 lastName: data.lastName,
-                lastMessage: data.messageContent,
-                messageType: data.messageType,
                 profilePicture: data.profilePicture,
                 isFavorite: data.isFavorite,
                 status: data.status,
+                lastMessage: String(data.messageContent),
+                messageType: data.messageType,
                 unreadCount: 0,
                 isSender: true,
             };
+
             return [newDm, ...prevDms];
         }
 
+        // ─── RECEIVED MESSAGE ─────────────────────────────────
         const index = prevDms.findIndex((dm) => dm.id === data.from);
+
         if (index !== -1) {
-            const unreadCount = prevDms[index].unreadCount + (activeDmId === data.from ? 0 : 1);
-            const updatedDm = {
+            const unreadCount =
+                prevDms[index].unreadCount +
+                (activeDmId === data.from ? 0 : 1);
+
+            const updatedDm: DmListType = {
                 ...prevDms[index],
+                lastMessage: String(data.messageContent),
                 messageType: data.messageType,
-                lastMessage: data.messageContent,
                 unreadCount,
                 isSender: false,
             };
-            return [updatedDm, ...prevDms.slice(0, index), ...prevDms.slice(index + 1)];
+
+            return [
+                updatedDm,
+                ...prevDms.slice(0, index),
+                ...prevDms.slice(index + 1),
+            ];
         }
 
         const newMessage: DmListType = {
             id: data.from,
             firstName: data.firstName,
             lastName: data.lastName,
-            messageType: data.messageType,
-            lastMessage: data.messageContent,
             profilePicture: data.profilePicture,
             isFavorite: data.isFavorite,
             status: data.status,
+            lastMessage: String(data.messageContent),
+            messageType: data.messageType,
             unreadCount: 1,
             isSender: false,
         };
+
         return [newMessage, ...prevDms];
     };
 }
@@ -168,79 +193,3 @@ const   useFetchAllAndSubscribe: () => {dms: FetchedData, contacts: FetchedData,
 
 
 export default useFetchAllAndSubscribe;
-
-
-/*
-fetching data
-    *provide a way to paginate the data
-    *socket events handler
-    *search input change for each tab means re-fetching data, reset pagination
-
-*/
-
-
-/*
-
-
-function usePaginatedData<T>(url: string) {
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
-    const [searchInput, setSearchInput] = useState('');
-    const [data, setData] = useFetch<T[]>(`${url}?${searchInput.length > 0 ? `search=${searchInput}` : ''}`);
-
-    const pageSize = 20;
-
-    // resiting pagination states when search input changes
-    useEffect(() => {
-        setPage(1);
-        setHasMore(true);
-    }, [searchInput])
-
-    console.log(`paginated data ${url}`)
-    const fetchMoreData = async () => {
-        if (!hasMore) return;
-
-        try {
-            const fetchedData: T[] = await sendLoggedInGetRequest(`${url}?${searchInput.length > 0 ? `search=${searchInput}` : ''}&page=${page + 1}&pageSize=${pageSize}`);
-            if (!fetchedData.length) {
-                setHasMore(false);
-                return;
-            }
-            setPage(prevPage => prevPage + 1);
-            console.log(`updating ${url}`)
-            setData(prevData => (prevData ? [...prevData, ...fetchedData] : fetchedData));
-        } catch (e) {
-            console.log(e);
-        }
-    };
-
-    return {
-        data,
-        setData,
-        fetchMoreData,
-        setSearchInput
-    };
-};
-
-const useDirectMessages = () => {
-    const { data: dms, setData, fetchMoreData, setSearchInput } = usePaginatedData<DmListType>(import.meta.env.VITE_LOCAL_CHAT_DMS);
-
-    return { 
-        dms,
-        fetchMoreData,
-        setDms: setData,
-        setSearchInput
-    };
-};
-
-const useContactList = () => {
-    const { data: contacts, setData: setContacts, fetchMoreData, setSearchInput} = usePaginatedData<DmListType>(import.meta.env.VITE_LOCAL_CHAT_CONTACTS);
-
-    return {
-        contacts,
-        fetchMoreData,
-        setContacts,
-        setSearchInput,
-    };
-};
-*/

@@ -86,7 +86,6 @@ function getDropdownItems() : DropdownItemType[] {
     const   dropdowns: DropdownItemType[] = [];
 
     const   handleBlock = async () => {
-        // http post request for blocking the active dm user
         try {
             await sendLoggedInActionRequest('POST', import.meta.env.VITE_LOCAL_PROFILE_BLOCK_API_URL + `/${activeDmId}`);
             eventObserver.publish(EventsEnum.APP_BLOCK_CHAT_UNLIKE, activeDmId);
@@ -95,7 +94,6 @@ function getDropdownItems() : DropdownItemType[] {
         catch (err) {
             console.log(err);
         }
-        console.log(`block ${activeDmId}`);
         // emit the Block event to the Dms List  Component
     }
 
@@ -122,18 +120,6 @@ function getDropdownItems() : DropdownItemType[] {
 }
 
 
-// function    dropdownItems() {
-//     const   dropdowns: DropdownItemType[] = [];  
-
-//     const   addDropdownItem = (item :DropdownItemType) => {
-//         dropdowns.push(item)
-//     }
-
-
-//     return {
-
-//     }
-// }
 
 const ContactInfo = () => {
     const { activeDmId } = useActiveDm();

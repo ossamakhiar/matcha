@@ -8,7 +8,9 @@ export type ChatListProps = {
     onClick: (id: number) => void;
 }
 
-export type    PresenceType = 'online' | 'offline';
+export type PresenceType = "online" | "offline";
+
+export type MessageKind = "text" | "audio" | "event";
 
 export type UserType = {
     id: number,
@@ -19,11 +21,10 @@ export type UserType = {
     status: PresenceType,
 }
 
-type messageContentTypes = 'audio' | 'text';
 
 export type ParticipantUser = UserType & {isFavorite: boolean}
 
-export type DmListType = ParticipantUser & {lastMessage: string, isSender: boolean, messageType: messageContentTypes, unreadCount: number}
+export type DmListType = ParticipantUser & {lastMessage: string, isSender: boolean, messageType: MessageKind, unreadCount: number}
 
 export type ContactDetailsType = UserType & {biography: string}
 
@@ -34,38 +35,70 @@ export type MessageProps = {
     sentAt: string,
 }
 
+export type EventStatus =
+    | "proposed"
+    | "accepted"
+    | "declined"
+    | "cancelled";
+
+export type EventMessageContent = {
+    id: number;
+    title: string;
+    eventDate: string;
+    eventStatus?: EventStatus;
+    notes?: string;
+    canRespond?: boolean;
+};
 
 
-export interface MessageType {
-    messageId: number;
-    isSender: boolean;
-    messageType: messageContentTypes;
-    messageContent: string; // ? text message or the audio resourse url
-    sentAt: string;
-}
+export type MessageContent =
+    | { messageType: "text"; content: string }
+    | { messageType: "audio"; content: string }
+    | { messageType: "event"; content: EventMessageContent };
 
-export interface IncomingMessagePayload {
-    from: number;
-    to: number;
-    isSender: boolean;
-    messageType: messageContentTypes;
-    messageContent: string;
-    sentAt: string;
-    profilePicture: string;
-    firstName: string;
-    lastName: string;
-    status: 'online' | 'offline';
-    isFavorite: boolean;
-}
+export type MessageType = {
+        messageId: number;
+        isSender: boolean;
+        sentAt: string;
+    } & MessageContent;
 
-
-
-
-
-
-// export type ChatListStateType = {
-//     dms: DmListType[],
-//     contacts: DmListType[],
-//     searchInput: string,
-//     currentTab: string,
-// }
+export type IncomingMessagePayload =
+    | {
+          from: number;
+          to: number;
+          isSender: boolean;
+          messageType: "text";
+          messageContent: string;
+          sentAt: string;
+          profilePicture: string;
+          firstName: string;
+          lastName: string;
+          status: PresenceType;
+          isFavorite: boolean;
+      }
+    | {
+          from: number;
+          to: number;
+          isSender: boolean;
+          messageType: "audio";
+          messageContent: string;
+          sentAt: string;
+          profilePicture: string;
+          firstName: string;
+          lastName: string;
+          status: PresenceType;
+          isFavorite: boolean;
+      }
+    | {
+          from: number;
+          to: number;
+          isSender: boolean;
+          messageType: "event";
+          messageContent: EventMessageContent;
+          sentAt: string;
+          profilePicture: string;
+          firstName: string;
+          lastName: string;
+          status: PresenceType;
+          isFavorite: boolean;
+      };

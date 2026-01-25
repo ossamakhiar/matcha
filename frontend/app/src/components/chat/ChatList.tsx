@@ -105,9 +105,6 @@ const   ChatList: FC<ChatListProps> = ({onClick}) => {
 
     const   currentTabData = data[tab as keyof typeof data].data || [];
 
-    // console.log('current tab list')
-    // console.log(currentTabData)
-
     return (
         <div className="w-full h-full pb-1">
             {/* <SocketManager /> */}

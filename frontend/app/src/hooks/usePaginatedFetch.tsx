@@ -5,7 +5,7 @@ import { sendLoggedInGetRequest } from "../utils/httpRequests";
 interface data<T> {
     data: T[] | undefined;
     setData: React.Dispatch<React.SetStateAction<T[] | undefined>>;
-    fetchMoreData: () => void;
+    fetchMoreData: () => Promise<void>;
     hasMore: boolean;
 }
 
@@ -37,7 +37,7 @@ function usePaginatedFetch<T>(url: string, uriQuery?: Record<string, string>) : 
             const paginatedUrl = `${url}?${queryString}&page=${page}&pageSize=${PAGE_SIZE}`;
 
             const data = await sendLoggedInGetRequest(paginatedUrl) as T[];
-            if (!(data.length > 0)) {
+            if (data.length == 0) {
                 setHasMore(false);
                 return ;
             }

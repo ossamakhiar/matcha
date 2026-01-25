@@ -1,40 +1,94 @@
 import { Socket } from "socket.io";
 import { emitChatMessageEvent, emitNotificationEvent, eventHandlerWithErrorHandler, extractUserId } from "../services/socket.service.js";
-import { IDirectMessage, IncomingMessagePayload } from "../types/chat.type.js";
+import { IncomingMessagePayload, PresentedDm } from "../types/chat.type.js";
 import ioEmitter from '../services/emitter.service.js';
 import { ApplicationError } from "../helpers/ApplicationError.js";
 import { areMatched, createNewDm, MarkMessageAsRead, messageExists } from "../services/chat.service.js";
 import { NotificationTypesEnum } from "../types/enums.js";
 import { createNewNotification } from "../services/notification.service.js";
 import { generateAudioFileName, getUserBrief, saveAudioFile } from "../services/helper.service.js";
+import { createEvent } from "../services/event.service.js";
+import assert from "assert";
 
+async function persistMessage(
+  senderId: number,
+  receiverId: number,
+  msg: IncomingMessagePayload
+): Promise<PresentedDm> {
+  switch (msg.messageType) {
+    case "text": {
+        const row = await createNewDm({
+            senderId,
+            receiverId,
+            messageType: "text",
+            content: msg.messageContent,
+        });
 
-async   function messagePersistencyHandler(senderId: number, receiverId: number, messageType: string, messageContent: string | ArrayBuffer) {
-    let audioFileName: string = '';
-
-    if (messageType === 'audio') {
-        // Asynchronously saving the file but synchronously validating the file mime
-        audioFileName = await saveAudioFile(messageContent as ArrayBuffer, generateAudioFileName(senderId));
+        assert(row.messageType === "text")
+        return {
+            id: row.id,
+            messageType: "text",
+            messageContent: row.content,
+            sentAt: row.sentAt,
+        };
     }
 
-    // if type is audio then content will be the audio file
-    const createdDm: IDirectMessage = await createNewDm(senderId, receiverId, messageType, messageType === 'text' ? messageContent : audioFileName)
-    return ({
-        ...createdDm,
-        messageContent: (createdDm.messageType === 'text') ? createdDm.messageContent : process.env.BASE_URL + '/' + audioFileName
-    })
+    case "audio": {
+        msg
+      const audioFileName = await saveAudioFile(
+        msg.messageContent,
+        generateAudioFileName(senderId)
+      );
+
+      const row = await createNewDm({
+        senderId,
+        receiverId,
+        messageType: "audio",
+        content: audioFileName,
+      });
+
+      return {
+        id: row.id,
+        messageType: "audio",
+        messageContent: `${process.env.BASE_URL}/${audioFileName}`, // client gets URL
+        sentAt: row.sentAt,
+      };
+    }
+
+    case "event": {
+      const event = await createEvent({
+        ...msg.messageContent,
+        creatorId: senderId,
+      });
+
+      const row = await createNewDm({
+        senderId,
+        receiverId,
+        messageType: "event",
+        eventId: event.id,
+      });
+
+      console.log(event)
+      return {
+        id: row.id,
+        messageType: "event",
+        messageContent: event,
+        sentAt: row.sentAt,
+      };
+    }
+
+    default: {
+      const _exhaustive: never = msg;
+      return _exhaustive;
+    }
+  }
 }
-
-
 async function sendMessageHandler(client: Socket, message: IncomingMessagePayload) {
     const   senderId = extractUserId(client);
     const   receiverId = message.to;
 
     // !! validate the emitted object
     // checking the message type should be either 'text' ot 'audio'
-    // console.log(`senderId: ${senderId}`)
-    // console.log(`receiverId: ${receiverId}`)
-    // console.log('dataaaaaaaaaaaaaaa')
     if (senderId === receiverId)
         return ;
 
@@ -43,18 +97,15 @@ async function sendMessageHandler(client: Socket, message: IncomingMessagePayloa
     if (!await areMatched(senderId, receiverId))
         throw new ApplicationError('you\'re not matched');
 
-    // console.log(receiverBreif);
     const senderBrief = await getUserBrief(senderId);
 
-    const   createdDm = await messagePersistencyHandler(senderId, receiverId, message.messageType, message.messageContent)
-    // const messageId = await createNewDm(senderId, receiverId, message.messageContent);
+    const   createdDm = await persistMessage(senderId, receiverId, message)
 
     emitChatMessageEvent(senderId, receiverId, true, createdDm, receiverBreif);
     emitChatMessageEvent(senderId, receiverId, false, createdDm, senderBrief);
 
 
     const notification = await createNewNotification(receiverId, senderBrief!, NotificationTypesEnum.NEW_MESSAGE);
-    // console.log(notification);
     emitNotificationEvent(receiverId, notification);
 
 }

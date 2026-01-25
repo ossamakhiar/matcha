@@ -1,10 +1,14 @@
-import { KeyboardEvent, useEffect, useRef } from "react";
+import { KeyboardEvent, useEffect, useRef, useState } from "react";
 import { useActiveDm } from "../../context/activeDmProvider";
 import { AiOutlineAudio } from "react-icons/ai";
 import { IoSend } from "react-icons/io5";
 import { useSocket } from "../../context/SocketProvider";
 import useRecorder from "../../hooks/useRecorder";
 import { EventsEnum } from "../../types";
+import { BsTrash3Fill } from "react-icons/bs";
+import ChatComposerActions from "./ChatComposerActions";
+import { Modal } from "../utils/Modal";
+import { CreateEventForm } from "./CreateEventForm";
 
 type OutgoingMessagePayload = {
     to: number,
@@ -20,6 +24,7 @@ const   ChatInputField = ({onSend}: {onSend: () => void}) => {
     const   socket = useSocket();
     const   { activeDmId } = useActiveDm();
     const   inputRef = useRef<HTMLInputElement>(null);
+    const   [isEventOpen, setIsEventOpen] = useState(false);
     const   {startRecording, stopRecording, isRecording, audioSeconds} = useRecorder();
 
     useEffect(() => {
@@ -58,8 +63,13 @@ const   ChatInputField = ({onSend}: {onSend: () => void}) => {
             <div className="absolute bottom-2 w-full px-3">
                 {isRecording ?
                     <div className="w-full flex items-center p-3 border rounded-lg gap-4 bg-transparent pr-20">
-                        <div className="font-semibold">
-                            {formatMinuteSecond(audioSeconds)}
+                        <div className="flex gap-2 items-center">
+                            <button onClick={sendHandler}>
+                                <BsTrash3Fill size={25} className="fill-red-500 " onClick={stopRecording} />
+                            </button>
+                            <span className="font-semibold text-sm">
+                                {formatMinuteSecond(audioSeconds)}
+                            </span>
                         </div>
                         <div className="flex justify-center w-full">
                         {
@@ -82,17 +92,24 @@ const   ChatInputField = ({onSend}: {onSend: () => void}) => {
                         </div>
                     </div>
                     :
-                    <input
-                        ref={inputRef}
-                        type="text"
-                        placeholder="Enter your message"
-                        className="outline-none border w-full p-3 px-3 pr-20 rounded-lg"
-                        onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && sendHandler()}
-                    />
+                    <>
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            placeholder="Enter your message"
+                            className="outline-none border w-full p-3 px-7 pr-20 rounded-lg"
+                            onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && sendHandler()}
+                        />
+                        <div className="absolute bottom-0 top-0 left-3.5 flex items-center">
+                            <ChatComposerActions
+                                onEventClick={() => setIsEventOpen(true)}
+                            />
+                        </div>
+                    </>
                 }
 
 
-
+                {/* right controls */}
                 <div className="absolute bottom-0 top-0 right-5 flex items-center gap-2">
                     <button className={`${inputRef?.current?.value || isRecording ? 'hidden' : ''}`}>
                         <AiOutlineAudio size={25} className="fill-gray-500 hover:fill-black" onClick={startRecording} />
@@ -101,8 +118,26 @@ const   ChatInputField = ({onSend}: {onSend: () => void}) => {
                         <IoSend size={25} className="fill-white" />
                     </button>
                 </div>
+            </div>
+        
 
-            </div> 
+            <Modal
+                isOpen={isEventOpen}
+                onClose={() => setIsEventOpen(false)}
+                title="create event"
+            >
+                <CreateEventForm
+                    onSubmit={(payload) => {
+                    sendMessage({
+                        type: "text",
+                        to: activeDmId,
+                        content: JSON.stringify({ kind: "event_proposal", ...payload }),
+                    });
+
+                    setIsEventOpen(false);
+                    }}
+                />
+            </Modal>
         </div>
     )
 

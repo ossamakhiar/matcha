@@ -2,34 +2,8 @@ import { QueryResult } from "pg";
 import pool from "../model/pgPoolConfig.js";
 import { isUserOnline } from "./socket.service.js";
 import HttpError from "../helpers/HttpError.js";
+import { DmCreateInput, DmRow } from "../types/chat.type.js";
 
-// type DmListType = {
-//     id: number,
-//     username: string,
-//     first_name: string,
-//     last_name: string,
-//     last_message: string,
-//     status: 'online' | 'offline',
-//     msg_created_at: Date,
-// }
-
-
-// export async function checkIdExists(id: number) {
-//     const   query = `SELECT EXISTS (
-//         SELECT 1 from "user" WHERE id = $1
-//     ) AS id_exists`;
-
-//     const   client = await pool.connect();
-
-//     try {
-//         const res = await client.query(query, [id]);
-//         return (res.rows[0].id_exists as boolean);
-//     } catch (e) {
-//         throw e;
-//     } finally {
-//         client.release();
-//     }
-// }
 
 export async function checkRecordExistence(table: string, recordId: number) {
     const query = `SELECT EXISTS (
@@ -446,30 +420,61 @@ export async function MarkMessageAsRead(messageId: number) {
 }
 
 
-export async function createNewDm(senderId: number, receiverId: number, messageType: string, messageContent: any) {
-    const   dmCreatationQuery = `INSERT INTO "dm"
-                                (sender_id, receiver_id, content_type, content) values ($1, $2, $3, $4)
-                                RETURNING id, sent_at, content_type, content;`
+export async function createNewDm(input: DmCreateInput): Promise<DmRow> {
+  const dbClient = await pool.connect();
 
-    const dbClient = await pool.connect();
+  try {
+    let query: string;
+    let params: any[];
 
-    try {
-        const results = await dbClient.query(dmCreatationQuery, [senderId, receiverId, messageType, messageContent]); // ? status get default ('unread') 
-        const insertedRow = results.rows[0];
-
-        return ({
-            id: insertedRow.id,
-            messageType: insertedRow.content_type,
-            messageContent: insertedRow.content,
-            sentAt: insertedRow.sent_at,
-        });
-    } catch (e) {
-        throw (e);
-    } finally {
-        dbClient.release();
+    if (input.messageType === "event") {
+      query = `
+        INSERT INTO "dm" (sender_id, receiver_id, content_type, event_id)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id, sent_at, content_type, content, event_id;
+      `;
+      params = [
+        input.senderId,
+        input.receiverId,
+        input.messageType,
+        input.eventId,
+      ];
+    } else {
+      query = `
+        INSERT INTO "dm" (sender_id, receiver_id, content_type, content)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id, sent_at, content_type, content, event_id;
+      `;
+      params = [
+        input.senderId,
+        input.receiverId,
+        input.messageType,
+        input.content,
+      ];
     }
-}
 
+    const { rows } = await dbClient.query(query, params);
+    const row = rows[0];
+
+    if (row.content_type === "event") {
+      return {
+        id: row.id,
+        messageType: "event",
+        eventId: row.event_id,
+        sentAt: row.sent_at,
+      };
+    }
+
+    return {
+      id: row.id,
+      messageType: row.content_type,
+      content: row.content,
+      sentAt: row.sent_at,
+    };
+  } finally {
+    dbClient.release();
+  }
+}
 
 export async function areMatched(userId1: number, userId2: number) {
     const   query = `SELECT CASE WHEN COUNT(*) = 2 THEN true ELSE false END AS are_matched

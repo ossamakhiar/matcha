@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { likeProfileService, blockUserService, reportFakeAccountService, getBriefProfileInfoService, getProfileInfoService, updateUserInterestsService, unlikeProfileService, addUserInterestsService } from '../services/profile.js';
-import { updatePersonalInfoService, updateUserLocation } from '../services/complete-profile.js';
+import { updatePersonalInfoService, updateUserLocation, getUserPhotoCount, addUserPhotosService, removeUserPhotoService } from '../services/complete-profile.js';
 import { isArray } from '../validators/generalPurpose.js';
 import { getHttpError } from '../helpers/getErrorObject.js';
 
@@ -249,5 +249,65 @@ export async function storeUserLocation(request: Request, response: Response) {
     } catch (e) {
         const {status, message} = getHttpError(e);
         response.status(status).json({status, message});
+    }
+}
+
+export async function addPhotosController(request: Request, response: Response) {
+    const MAX_PHOTOS = 4;
+    
+    try {
+        const userId = request.user.id;
+        const files = request.files as Express.Multer.File[];
+
+        if (!files || files.length === 0) {
+            response.status(400).send({ msg: 'No files uploaded' });
+            return;
+        }
+
+        const currentPhotoCount = await getUserPhotoCount(userId);
+        
+        if (currentPhotoCount >= MAX_PHOTOS) {
+            response.status(400).send({ msg: 'Maximum photo limit reached' });
+            return;
+        }
+
+        const availableSlots = MAX_PHOTOS - currentPhotoCount;
+        const photosToAdd = files.slice(0, availableSlots);
+        const photosPaths: string[] = photosToAdd.map(file => file.path);
+
+        await addUserPhotosService(userId, photosPaths);
+        
+        response.status(200).send({ 
+            message: 'Photos uploaded successfully', 
+            count: photosToAdd.length,
+            total: currentPhotoCount + photosToAdd.length
+        });
+    } catch (error) {
+        console.error('Error uploading photos:', error);
+        response.status(500).send({ message: 'Error uploading photos' });
+    }
+}
+
+export async function removePhotoController(request: Request, response: Response) {
+    try {
+        const userId = request.user.id;
+        const { photoId } = request.body;
+
+        if (!photoId || typeof photoId !== 'number') {
+            response.status(400).send({ msg: 'Valid photo ID is required' });
+            return;
+        }
+
+        const removed = await removeUserPhotoService(userId, photoId);
+        
+        if (!removed) {
+            response.status(404).send({ msg: 'Photo not found' });
+            return;
+        }
+
+        response.status(200).send({ message: 'Photo removed successfully' });
+    } catch (error) {
+        console.error('Error removing photo:', error);
+        response.status(500).send({ message: 'Error removing photo' });
     }
 }

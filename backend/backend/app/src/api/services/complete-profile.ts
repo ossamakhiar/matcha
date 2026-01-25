@@ -4,6 +4,37 @@ import pool from '../model/pgPoolConfig.js';
 
 dotenv.config();
 
+export async function getUserPhotoCount(userId: number): Promise<number> {
+    const client = await pool.connect();
+
+    try {
+        const query = 'SELECT COUNT(*) as count FROM user_photo WHERE user_id = $1';
+        const result = await client.query(query, [userId]);
+        return parseInt(result.rows[0].count);
+    } catch (err) {
+        console.error('Error getting user photo count:', err);
+        throw new Error('Failed to get user photo count');
+    } finally {
+        client.release();
+    }
+}
+
+export async function removeUserPhotoService(userId: number, photoId: number): Promise<boolean> {
+    const client = await pool.connect();
+
+    try {
+        const query = 'DELETE FROM user_photo WHERE user_id = $1 AND id = $2 RETURNING id';
+        const result = await client.query(query, [userId, photoId]);
+        
+        return (result.rowCount ?? 0) > 0;
+    } catch (err) {
+        console.error('Error removing user photo:', err);
+        throw new Error('Failed to remove user photo');
+    } finally {
+        client.release();
+    }
+}
+
 export async function addUserPhotosService(userId: number, imageUrls: string[]) {
     const client = await pool.connect();
 

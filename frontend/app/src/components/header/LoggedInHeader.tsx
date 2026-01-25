@@ -65,6 +65,7 @@ function LoggedInHeader() {
                     <li><NavLink className="p-3 lg:p-5 hover:text-pastel-pink" to='/explore'>explore</NavLink></li>
                     <li><NavLink className="p-3 lg:p-5 hover:text-pastel-pink" to='/profile'>profile</NavLink></li>
                     <li><NavLink className="p-3 lg:p-5 hover:text-pastel-pink" to='/chat'>chat</NavLink></li>
+                    <li><NavLink className="p-3 lg:p-5 hover:text-pastel-pink" to='/events'>events</NavLink></li>
                     <li><NavLink className="p-3 lg:p-5 hover:text-pastel-pink" to='/history'>history</NavLink></li>
                 </ul>
                 <img src="/icons/nav-bar-divider.svg" alt="nav bar divider" className="h-34px mt-5" />

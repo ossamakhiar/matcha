@@ -10,7 +10,9 @@ import {
     unlikeProfileController,
     updateInterestsController,
     updatePersonalInfoController,
-    storeUserLocation
+    storeUserLocation,
+    addPhotosController,
+    removePhotoController
 } from "../controllers/profile.js";
 import { blockMiddleware, validateUserIdParam, validStoreUserLocation } from "../middlewares/profile.js";
 import { validateJwtToken, validateCSRFCookies } from "../middlewares/authorization.js";
@@ -32,6 +34,8 @@ router.post('/reportFakeAccount/:userId', validateUserIdParam, blockMiddleware, 
 router.post('/likeProfile/:userId', validateUserIdParam, blockMiddleware, likeProfileController);
 router.post('/unlikeProfile/:userId', validateUserIdParam, blockMiddleware, unlikeProfileController);
 router.post('/updatePersonalInfo', upload.single('profilePicture'), validateCompleteProfileBody, updatePersonalInfoController);
+router.post('/addPhotos', upload.array('image', 4), addPhotosController);
+router.delete('/removePhoto', removePhotoController);
 router.post("/send-location", validStoreUserLocation, storeUserLocation)
 
 export default router;

@@ -5,12 +5,6 @@ import { getHttpError } from '../helpers/getErrorObject.js';
 
 export async function getUserContacts(request: Request, response: Response) {
     const   userId = request.user.id;
-    console.log(`*******************`)
-    // console.log(request.query);
-    // const   page = Number(request.query.page) || 1;
-    // const   pageSize = Number(request.query.pageSize) || 20;
-
-    console.log(`get contacts of userID ${userId}`)
 
     try {
         const   contacts = await getContactsService(userId);
@@ -59,7 +53,6 @@ export async function getDmHistory(request: Request, response: Response) {
         const chatHistory = await getChatHistory(userId, participantId, page, pageSize);
         response.json(chatHistory);
     } catch (e) {
-        console.log(e);
         const {status, message} = getHttpError(e);
         response.status(status).json({status, message});
     }

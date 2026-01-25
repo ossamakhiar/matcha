@@ -5,8 +5,6 @@ type    EventHandlerType = [event: string, (data: any) => void];
 
 export function    prepareSocketEventRegistration(eventHandlers : EventHandlerType[]) {
     return (socket: Socket) => {
-        console.log(socket);
-
         eventHandlers.forEach(([event, handler]) => {
             socket.on(event, handler);
         })

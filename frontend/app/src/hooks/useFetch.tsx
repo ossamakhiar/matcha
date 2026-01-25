@@ -7,22 +7,17 @@ function useFetch<T>(url: string, dependency?: any[]): [T | undefined, React.Dis
     const   [data, setData] = useState<T>();
     const   [error, setError] = useState<string | null>(null);
 
-    // console.log("trying to fetch");
     // define which function to call sendLoggedInGetRequest if it get request, using it by default
     useEffect(() => {
         const fetchData =  async () => {
             try {
                 const data = await sendLoggedInGetRequest(url);
-                console.log(data);
                 setData(data);
             } catch (error) {
-                console.log(`fetch error: ${error}`);
-
                 setError(`fetch error: something went wrong`);
             }
         }
 
-        console.log("fetching.....");
         fetchData();
     }, [url, ...(dependency ? dependency : [])])
 

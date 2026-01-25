@@ -43,10 +43,8 @@ function useError() {
 // ! move to helpers
 async function markMessagesAsRead(id: number) {
     try {
-        console.log(`marking for: ${(import.meta.env.VITE_LOCAL_CHAT_MARK_AS_READ as string).replace(':userId', String(id))}`)
         await sendLoggedInActionRequest('PATCH', (import.meta.env.VITE_LOCAL_CHAT_MARK_AS_READ as string).replace(':userId', String(id)));
     } catch (e) {
-        console.log(e);
         eventObserver.publish(GlobalEventEnum.ERROR_OCCURED, 'something went wrong');
     }
 }
@@ -66,7 +64,6 @@ const Chat = () => {
     }, [conversationId])
 
     const isDmActive = activeDmId !== -1;
-    console.log(conversationId)
 
     const   onDmSelect = (id: number) => {
         // /chat/dms/:userId/read

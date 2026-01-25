@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { sendActionRequest } from "../../utils/httpRequests";
+import { toast } from "../../utils/toast";
 
 const ResetPasswordSchema = Yup.object().shape({
     newPassword: Yup.string()
@@ -33,9 +34,10 @@ export default function ResetPassword() {
         try {
             await sendActionRequest('PATCH', import.meta.env.VITE_LOCAL_RESET_PASSWORD_API_URL as string, { password: values.newPassword }, token);
             setMessage("Password has been reset successfully.");
+            toast.success('Password reset successfully');
         } catch (error) {
             setMessage("Failed to reset password. Please try again.");
-            console.error(error);
+            toast.error('Failed to reset password');
         } finally {
             setTimeout(() => {
                 navigate('/login');

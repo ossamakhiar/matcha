@@ -27,7 +27,6 @@ class   EventObserver {
             return ;
     
         this.observers[event].forEach((cb) => cb(data))
-        console.log(this.observers);
     }
 
 }

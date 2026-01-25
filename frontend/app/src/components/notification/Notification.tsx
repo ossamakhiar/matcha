@@ -36,8 +36,6 @@ const   Notification = () => {
         setUnreadCount(count);
     }, [notifications])
 
-    console.log(`count ${unreadCount}`)
-
     registerNotificationEventHandlers(setNotifications);
 
 
@@ -60,7 +58,7 @@ const   Notification = () => {
                         Notifications
                     </div>
                     <div className="w-full max-h-[60vh] overflow-auto scrollbar bg-white">
-                        <div onClick={() => {console.log('clicked'); setIsOpen(false);}}>
+                        <div onClick={() => {setIsOpen(false);}}>
                             {
                                 notifications && <NotificationList notifications={notifications} />
                             }

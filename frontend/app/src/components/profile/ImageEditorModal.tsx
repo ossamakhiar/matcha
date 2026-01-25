@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Cropper, { Area } from "react-easy-crop";
 import { buildFilteredPreviewUrl, defaultFilters, FilterSettings, getCroppedFilteredImageFile } from "../utils/imageUtils";
+import { toast } from "../../utils/toast";
 
 type Props = {
   file: File;
@@ -46,7 +47,7 @@ export default function ImageEditorModal({ file, onCancel, onDone }: Props) {
           return newUrl;
         });
       } catch (err) {
-        console.log(err)
+        toast.error('Failed to apply filters');
     }
     }, 80);
 

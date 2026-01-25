@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { getCookie } from "../../utils/generalPurpose";
 import Tag from "../../components/utils/Tag";
 import { CompleteProfileNextStep } from "../../types/enums";
+import { toast } from "../../utils/toast";
 
 const InterestTag = () => {
     const   [selectedTags, setSelectedTags] = useState<Set<string>>(new Set())
@@ -41,16 +42,16 @@ const InterestTag = () => {
     }
 
     const handleContinue = async () => {
-        console.log([...selectedTags]);
         try {
             await sendLoggedInActionRequest('POST', import.meta.env.VITE_LOCAL_COMPLETE_PROFILE_INTERESTS_API_URL, {interests: [...selectedTags]}, 'application/json');
 
+            toast.success('Interests saved successfully');
             setTimeout(() => {
                 navigate('/complete-info/3');
             }, 1000);
         }
         catch (err) {
-            console.log(err);
+            toast.error('Failed to save interests');
         }
     }
 

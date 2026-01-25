@@ -47,15 +47,12 @@ function UserProfile() {
             setIsLoading(true);
             setErrorOccurred(false);
             try {
-                console.log('USERID: ' + import.meta.env.VITE_LOCAL_PROFILE_INFO_API_URL + `/${userId}`);
-
                 const profileInfoUrl = (userId ? import.meta.env.VITE_LOCAL_PROFILE_INFO_API_URL + `/${userId}` : import.meta.env.VITE_LOCAL_CURR_PROFILE_INFO_API_URL);
                 const responseBody = await sendLoggedInGetRequest(profileInfoUrl);
 
-                console.log('profilePicture: ' + responseBody.profileInfo.userInfo.profilePicture);
-
                 if (!responseBody || !isOfProfileInfoType(responseBody.profileInfo)) {
                     setErrorOccurred(true);
+                    toast.error('Failed to load profile information');
                     return ;
                 }
 
@@ -64,7 +61,6 @@ function UserProfile() {
 
                 // ? *******
                 if (userId) {
-                    console.log(`targetUserId: ${userId}`);
                     const data = await sendLoggedInActionRequest('POST', `${import.meta.env.VITE_LOCAL_HISTORY_VISIT}/${userId}`);
                     if (data.success) // emit visit notification only when the visit history is being added (1 hour interval)
                         socket?.emit(EventsEnum.NOTIFICATION_VISIT, {targetUserId: Number(userId)});
@@ -72,7 +68,7 @@ function UserProfile() {
                 // ? *******
             } catch(err) {
                 setErrorOccurred(true);
-                // navigate to a not found or error occured page
+                toast.error('An error occurred while loading the profile');
             } finally {
                 setIsLoading(false);
             }
@@ -137,7 +133,7 @@ function UserProfile() {
             // ? **************
         }
         catch (err) {
-            console.log(err);
+            toast.error('Failed to unlike profile');
         }
     }
 
@@ -166,11 +162,11 @@ function UserProfile() {
         try {
             await sendLoggedInActionRequest('PATCH', import.meta.env.VITE_LOCAL_PROFILE_INTERESTS_API_URL, {interests: [...newSelectedInterests]}, 'application/json');
 
-            // console.log('new selected interests: ' + newSelectedInterests);
             setProfileInfo(profileInfoCopy);
+            toast.success('Interests updated successfully');
         }
         catch (err) {
-            console.log(err);
+            toast.error('Failed to update interests');
         }
         finally {
             setIsInterestsEditOpen(false);
@@ -191,12 +187,13 @@ function UserProfile() {
             profileInfoCopy.userInfo.isLiking = false;
             setProfileInfo(profileInfoCopy);
 
+            toast.success('User blocked successfully');
             setTimeout(() => {
                 navigate('/profile');
             }, 500);
         }
         catch (err) {
-            console.log(err);
+            toast.error('Failed to block user');
         }
         finally {
             setIsBlockAreYouSureModelOpen(false);
@@ -210,9 +207,10 @@ function UserProfile() {
 
         try {
             await sendLoggedInActionRequest('POST', import.meta.env.VITE_LOCAL_PROFILE_REPORT_FAKE_API_URL + `/${userId}`);
+            toast.success('Report submitted successfully');
         }
         catch (err) {
-            console.log(err);
+            toast.error('Failed to submit report');
         }
         finally {
             setIsFakeReportAreYouSureModelOpen(false);

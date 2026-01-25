@@ -24,7 +24,6 @@ import { getUserBrief, substituteActorInNotificationDesc } from "./helper.servic
 
 export async function    profileVisitNotificationHandler(client: Socket, data: UserEventData) {
     // validate data object
-    console.log(data);
     if (!isValidUserEventData(data))
         throw new ApplicationError('Invalid visit event data')
 
@@ -257,7 +256,6 @@ export  async function notificationMarkAsReadService(userId: number) {
 
     try {
         await client.query(query, [userId]);
-        console.log(`notification read by userId ${userId}`);
     } catch (e) {
         throw (e);
     } finally {

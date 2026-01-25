@@ -4,6 +4,7 @@ import { useState } from 'react';
 import * as Yup from 'yup';
 import { sendActionRequest } from '../../utils/httpRequests';
 import { getFormError } from '../../utils/typeGuards';
+import { toast } from '../../utils/toast';
 
 const SignupSchema = Yup.object().shape({
     email: Yup.string()
@@ -57,11 +58,12 @@ const SignUp = () => {
             await sendActionRequest('POST', import.meta.env.VITE_LOCAL_SIGNUP_API_URL as string, values);
 
             setShowVerificationMessage(true);
+            toast.success('Account created! Please check your email to verify');
         } catch (error) {
             let formError = getFormError(error);
 
             if (formError === undefined) {
-                console.log('Unexpected error structure: ' + error);
+                toast.error('An unexpected error occurred during signup');
                 return ;
             }
 
@@ -83,7 +85,7 @@ const SignUp = () => {
                 return ;
             }
 
-            console.error('Unhandled field: ', field);
+            toast.error(`Error with ${field}: ${message}`);
 
         } finally {
             setSubmitting(false);

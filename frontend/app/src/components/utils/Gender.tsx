@@ -4,7 +4,6 @@ type GenderProps = {
 };
 
 function Gender({gender, iconsFolder}: GenderProps) {
-    console.log(gender);
     function genderIconPath(): string {
         let svgPath = '';
         const genders = new Set(['male', 'female', 'transgender']);

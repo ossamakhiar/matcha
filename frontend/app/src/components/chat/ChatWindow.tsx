@@ -11,6 +11,7 @@ import useFetch from "../../hooks/useFetch";
 import usePaginatedFetch from "../../hooks/usePaginatedFetch";
 import { sendLoggedInActionRequest } from "../../utils/httpRequests";
 import { useSocket } from "../../context/SocketProvider";
+import { toast } from "../../utils/toast";
 
 // function   
 
@@ -133,8 +134,7 @@ const ChatWindow = () => {
             await sendLoggedInActionRequest(!participant.isFavorite ? 'POST' : 'DELETE', import.meta.env.VITE_LOCAL_CHAT_FAVORITES, {userId: activeDmId});
             eventObserver.publish(EventsEnum.APP_FAVORITE_CHANGE, conversationId);
         } catch (e) {
-            console.log(e);
-            // ! later handling
+            toast.error('Failed to toggle favorite');
         }
     }
 

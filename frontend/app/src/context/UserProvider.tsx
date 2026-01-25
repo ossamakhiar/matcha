@@ -30,7 +30,6 @@ const   UserInfoProvider = ({children}: Props) => {
 
                 setProfileInfo(responseBody.profileInfo.userInfo);
             } catch(err) {
-                console.log(err)
                 // setErrorOccurred(true);
             }
         })();

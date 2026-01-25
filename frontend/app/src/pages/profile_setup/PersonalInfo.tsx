@@ -9,6 +9,7 @@ import { BriefProfileInfo } from "../../types/profile";
 import { getCookie } from "../../utils/generalPurpose";
 import ErrorOccurred from "../../components/utils/error-occurred/ErrorOccurred";
 import { CompleteProfileNextStep } from "../../types/enums";
+import { toast } from "../../utils/toast";
 
 type SelectOptions = {
     value: string;
@@ -65,20 +66,18 @@ const PersonalInfo = () => {
         (async function fetchDefaultPersonalInfo() {
             try {
                 const responseBody = await sendLoggedInGetRequest(import.meta.env.VITE_LOCAL_CURR_USER_BRIEF_INFO_API_URL);
-                console.log(responseBody);
                 if (!responseBody || !isOfBriefProfileInfoType(responseBody.profileInfo)) {
-                    console.log('HERE1');
                     setErrorOccurred(true);
                     setIsLoading(false);
+                    toast.error('Failed to load profile information');
                     return ;
                 }
-                console.log('HERE2');
 
                 setDefaultProfileInfo(responseBody.profileInfo);
                 setIsLoading(false);
             }
             catch (err) {
-                console.log(err);
+                toast.error('An error occurred while loading profile');
                 setIsLoading(false);
             }
         })();
@@ -151,6 +150,7 @@ const PersonalInfo = () => {
         try {
             await sendFormDataRequest('POST', import.meta.env.VITE_LOCAL_COMPLETE_PERSONAL_INFO_API_URL as string, formData);
 
+            toast.success('Personal information saved successfully');
             // pass to next complete-info page
             setTimeout(() => {
                 navigate('/complete-info/2');
@@ -159,7 +159,7 @@ const PersonalInfo = () => {
             let formError = getFormError(error);
 
             if (formError === undefined) {
-                console.log('Unexpected error structure: ' + error);
+                toast.error('An unexpected error occurred');
                 return ;
             }
 
@@ -176,7 +176,7 @@ const PersonalInfo = () => {
                 return ;
             }
 
-            console.error('Unhandled field: ', field);
+            toast.error(`Error with ${field}: ${message}`);
 
         } finally {
             setSubmitting(false);

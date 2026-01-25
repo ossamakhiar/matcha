@@ -78,8 +78,6 @@ const AdvancedSearch = () => {
 
             const responseBody = await sendLoggedInActionRequest('POST', import.meta.env.VITE_LOCAL_RECOMMENDED_PROFILES_API_URL, requestBody);
 
-            console.log('AdvancedSearch recommendedProfiles: ', responseBody.recommendedProfiles);
-
             if (!responseBody?.recommendedProfiles
                 || !Array.isArray(responseBody.recommendedProfiles)
                 || !responseBody.recommendedProfiles.every( (recommendedProfile: any) => isOfBackendRecommendedProfileType(recommendedProfile))) {

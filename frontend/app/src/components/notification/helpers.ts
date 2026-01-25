@@ -9,7 +9,6 @@ export function registerNotificationEventHandlers(setNotifications: Dispatch<Set
 
     const   handleNewNotification = (notification: INotification) => {
         // i think, i should not overwhelmed user, with message notifications when the chat is open
-        console.log(notification);
         setNotifications((prev) => {
             if (!prev)
                 return (prev);
@@ -26,11 +25,9 @@ export function registerNotificationEventHandlers(setNotifications: Dispatch<Set
 
 
 export async function markNotificationAsRead() {
-    console.log('marking read')
     try {
         await sendLoggedInActionRequest('PATCH', import.meta.env.VITE_LOCAL_NOTIFICATION_MARK_READ);
     } catch (e) {
-        console.log('marking notification as read error');
-        console.log(e);
+        // Silent fail
     }
 }

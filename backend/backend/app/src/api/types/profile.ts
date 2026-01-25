@@ -1,7 +1,12 @@
+export type UserPhoto = {
+    id: number;
+    url: string;
+};
+
 export type ProfileInfo = {
     userInfo: UserInfo;
     interests: string[];
-    userPhotos: string[];
+    userPhotos: UserPhoto[];
 }
 
 export type UserInfo = {

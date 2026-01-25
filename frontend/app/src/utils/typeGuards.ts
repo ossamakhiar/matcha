@@ -41,7 +41,13 @@ export function isOfProfileInfoType(obj: any) : obj is ProfileInfo {
     return (
         obj !== null && typeof obj === 'object'
         && isArray(obj.interests, undefined, 'string')
-        && isArray(obj.userPhotos, undefined, 'string')
+        && Array.isArray(obj.userPhotos)
+        && obj.userPhotos.every((photo: any) => 
+            photo !== null && 
+            typeof photo === 'object' && 
+            typeof photo.id === 'number' && 
+            typeof photo.url === 'string'
+        )
         && obj.userPhotos.length <= 4
         && isOfUserInfoType(obj.userInfo)
     );

@@ -1,6 +1,6 @@
 import interestsList from "../helpers/interestsList.js";
 import pool from "../model/pgPoolConfig.js";
-import { BriefProfileInfo, ProfileInfo, UserInfo } from "../types/profile.js";
+import { BriefProfileInfo, ProfileInfo, UserInfo, UserPhoto } from "../types/profile.js";
 import dotenv from 'dotenv'
 
 dotenv.config();
@@ -36,12 +36,12 @@ export async function getUserInterests(userId: number): Promise<string[]> {
     }
 }
 
-async function getUserPhotos(userId: number): Promise<string[]> {
+async function getUserPhotos(userId: number): Promise<UserPhoto[]> {
     let client;
 
     try {
         client = await pool.connect();
-        const query = `SELECT photo FROM "user_photo" WHERE user_id = $1;`
+        const query = `SELECT id, photo FROM "user_photo" WHERE user_id = $1;`
 
         const result = await client.query(query, [userId]);
 
@@ -49,9 +49,12 @@ async function getUserPhotos(userId: number): Promise<string[]> {
             return [];
         }
 
-        const photosPaths = result.rows.map(row => process.env.BASE_URL + '/' + row.photo);
+        const photos = result.rows.map(row => ({
+            id: row.id,
+            url: process.env.BASE_URL + '/' + row.photo
+        }));
 
-        return (photosPaths);
+        return photos;
     }
     catch (err) {
         throw new Error('failed to retrieve profile photos');

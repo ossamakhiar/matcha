@@ -19,6 +19,7 @@ function HamburgerMenuOverlay({handleHamburgerMenuOverlayClose, handleLogout}: H
                     <li onClick={() => { handleHamburgerMenuOverlayClose('/explore') }} className="w-full text-center block p-2 hover:text-pastel-pink hover:bg-gray-300 text-lg">explore</li>
                     <li onClick={() => { handleHamburgerMenuOverlayClose('/profile') }} className="w-full text-center block p-2 hover:text-pastel-pink hover:bg-gray-300 text-lg">profile</li>
                     <li onClick={() => { handleHamburgerMenuOverlayClose('/chat') }} className="w-full text-center block p-2 hover:text-pastel-pink hover:bg-gray-300 text-lg">chat</li>
+                    <li onClick={() => { handleHamburgerMenuOverlayClose('/events') }} className="w-full text-center block p-2 hover:text-pastel-pink hover:bg-gray-300 text-lg">events</li>
                     <li onClick={() => { handleHamburgerMenuOverlayClose('/history') }} className="w-full text-center block p-2 hover:text-pastel-pink hover:bg-gray-300 text-lg">history</li>
                     <li className="w-full text-center block p-2 hover:text-pastel-pink hover:bg-gray-300 text-lg" onClick={handleLogout} >logout</li>
                 </ul>

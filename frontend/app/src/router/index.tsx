@@ -22,6 +22,7 @@ import NotFound from "../components/utils/not-found/NotFound";
 import AdvancedSearch from "../pages/explore/AdvancedSearch";
 import Recommendation from "../pages/explore/Recommendation";
 import ExploreGate from "../pages/explore/ExploreGate";
+import EventsPage from "../pages/events/EventsPage";
 
 const router = createBrowserRouter([
     {
@@ -103,6 +104,10 @@ const router = createBrowserRouter([
     {
       path: '/notifications',
       element: <LoggedInLayout><NotificationPage /></LoggedInLayout>
+    },
+    {
+      path: '/events',
+      element: <LoggedInLayout><EventsPage /></LoggedInLayout>
     },
     {
       path: '*',  // Catch all other routes

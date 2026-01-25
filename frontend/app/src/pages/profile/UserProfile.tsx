@@ -6,18 +6,19 @@ import FameRatingDisplay from "../../components/utils/FameRatingDisplay";
 import EditProfileButton from "../../components/profile/EditProfileButton";
 import interests from "../../utils/interests";
 import EditProfileOverlay from "../../components/profile/EditProfileOverlay";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import EditInterestsOverlay from "../../components/profile/EditInterestsOverlay";
 import LikeProfileButton from "../../components/profile/LikeProfileButton";
 import UnlikeProfileButton from "../../components/profile/UnlikeProfileButton";
 import LikeBackProfileButton from "../../components/profile/LikeBackProfileButton";
 import { ProfileInfo } from "../../types/profile";
-import { sendLoggedInActionRequest, sendLoggedInGetRequest } from "../../utils/httpRequests";
+import { sendLoggedInActionRequest, sendLoggedInGetRequest, sendFormDataRequest } from "../../utils/httpRequests";
 import AreYouSureOverlay from "../../components/profile/AreYouSureOverlay";
 import ErrorOccurred from "../../components/utils/error-occurred/ErrorOccurred";
 import { isOfProfileInfoType } from "../../utils/typeGuards";
 import { useSocket } from "../../context/SocketProvider";
 import { EventsEnum } from "../../types";
+import { toast } from "../../utils/toast";
 
 function UserProfile() {
     // ? By OUSSAMA
@@ -32,7 +33,13 @@ function UserProfile() {
     let [isBlockAreYouSureModelOpen, setIsBlockAreYouSureModelOpen] = useState(false);
     let [isLoading, setIsLoading] = useState(true);
     let [errorOccurred, setErrorOccurred] = useState(false);
+    let [isUploadingPhotos, setIsUploadingPhotos] = useState(false);
+    let [removingPhotoId, setRemovingPhotoId] = useState<number | null>(null);
+    let [isRemovePhotoModalOpen, setIsRemovePhotoModalOpen] = useState(false);
+    let [photoToRemove, setPhotoToRemove] = useState<number | null>(null);
     let navigate = useNavigate();
+
+    const MAX_PHOTOS = 4;
 
     // TODO : this should be part of LoggedInLayout
     useEffect(() => {
@@ -212,6 +219,96 @@ function UserProfile() {
         }
     }
 
+    function handlePhotoUploadClick() {
+        if (!profileInfo?.userInfo.isSelf) return;
+        if (profileInfo.userPhotos.length >= MAX_PHOTOS) return;
+        
+        document.getElementById('photo-upload-input')?.click();
+    }
+
+    async function handlePhotoUploadChange(event: ChangeEvent<HTMLInputElement>) {
+        const files = event.target.files;
+        
+        if (!files || files.length === 0 || !profileInfo) {
+            return;
+        }
+
+        const currentPhotoCount = profileInfo.userPhotos.length;
+        const availableSlots = MAX_PHOTOS - currentPhotoCount;
+        
+        if (availableSlots <= 0) {
+            toast.error('You have reached the maximum number of photos (4)');
+            return;
+        }
+
+        setIsUploadingPhotos(true);
+
+        try {
+            const formData = new FormData();
+            const filesToUpload = Array.from(files).slice(0, availableSlots);
+            
+            filesToUpload.forEach((file) => {
+                formData.append('image', file);
+            });
+
+            await sendFormDataRequest(
+                'POST', 
+                `${import.meta.env.VITE_API_URL}/addPhotos`, 
+                formData
+            );
+
+            const profileInfoUrl = import.meta.env.VITE_LOCAL_CURR_PROFILE_INFO_API_URL;
+            const responseBody = await sendLoggedInGetRequest(profileInfoUrl);
+            
+            if (responseBody && isOfProfileInfoType(responseBody.profileInfo)) {
+                responseBody.profileInfo.interests = new Set(responseBody.profileInfo.interests);
+                setProfileInfo(responseBody.profileInfo);
+                toast.success(`Successfully uploaded ${filesToUpload.length} photo${filesToUpload.length > 1 ? 's' : ''}`);
+            }
+
+            event.target.value = "";
+        } catch (err) {
+            toast.error('Failed to upload photos. Please try again.');
+        } finally {
+            setIsUploadingPhotos(false);
+        }
+    }
+
+    function handlePhotoRemoveClick(photoId: number) {
+        setPhotoToRemove(photoId);
+        setIsRemovePhotoModalOpen(true);
+    }
+
+    async function handlePhotoRemove() {
+        if (!profileInfo || !photoToRemove) return;
+
+        setRemovingPhotoId(photoToRemove);
+        setIsRemovePhotoModalOpen(false);
+
+        try {
+            await sendLoggedInActionRequest(
+                'DELETE',
+                `${import.meta.env.VITE_API_URL}/removePhoto`,
+                { photoId: photoToRemove },
+                'application/json'
+            );
+
+            const profileInfoUrl = import.meta.env.VITE_LOCAL_CURR_PROFILE_INFO_API_URL;
+            const responseBody = await sendLoggedInGetRequest(profileInfoUrl);
+            
+            if (responseBody && isOfProfileInfoType(responseBody.profileInfo)) {
+                responseBody.profileInfo.interests = new Set(responseBody.profileInfo.interests);
+                setProfileInfo(responseBody.profileInfo);
+                toast.success('Photo removed successfully');
+            }
+        } catch (err) {
+            toast.error('Failed to remove photo. Please try again.');
+        } finally {
+            setRemovingPhotoId(null);
+            setPhotoToRemove(null);
+        }
+    }
+
     return (
         <div className="flex justify-center mt-5 mr-4 ml-4">
             <div className="mb-6 w-full" style={{maxWidth: 1068}}>
@@ -270,16 +367,59 @@ function UserProfile() {
                     <div className="shadow rounded-20px w-boxx pb-5">
                         <div className="flex justify-between">
                             <h2 style={{fontSize: 30, fontWeight: 'semi-bold'}} className="risque-regular pt-6 pl-2 sm:pl-6 pb-6">Photos</h2>
-                            <div className="cursor-pointer">
-                                <img src="/icons/upload-photo.svg" alt="uplaod photo svg" className="pt-6 pr-2 sm:pr-6"/>
-                            </div>
+                            {profileInfo.userInfo.isSelf && (
+                                <div 
+                                    className={`cursor-pointer ${
+                                        profileInfo.userPhotos.length >= MAX_PHOTOS || isUploadingPhotos
+                                            ? 'opacity-50 cursor-not-allowed' 
+                                            : 'hover:opacity-75'
+                                    }`}
+                                    onClick={handlePhotoUploadClick}
+                                    title={
+                                        profileInfo.userPhotos.length >= MAX_PHOTOS
+                                            ? 'Maximum photos reached'
+                                            : 'Upload more photos'
+                                    }
+                                >
+                                    <img 
+                                        src="/icons/upload-photo.svg" 
+                                        alt="upload photo svg" 
+                                        className="pt-6 pr-2 sm:pr-6"
+                                    />
+                                </div>
+                            )}
                         </div>
+                        <input
+                            id="photo-upload-input"
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handlePhotoUploadChange}
+                            disabled={isUploadingPhotos || profileInfo.userPhotos.length >= MAX_PHOTOS}
+                        />
                         <div className="gallery gallery-padding bt-2 pb-6">
                             {
                                 profileInfo && profileInfo.userPhotos && profileInfo.userPhotos.length > 0 ?
-                                profileInfo.userPhotos.map((pictureURL) => (
-                                    <div className="user-photo gallery-item bg-cover bg-no-repeat bg-center"
-                                        style={{backgroundImage: `url(${pictureURL})`}}>
+                                profileInfo.userPhotos.map((photo) => (
+                                    <div 
+                                        key={photo.id}
+                                        className="user-photo gallery-item bg-cover bg-no-repeat bg-center relative group"
+                                        style={{backgroundImage: `url(${photo.url})`}}>
+                                        {profileInfo.userInfo.isSelf && (
+                                            <button
+                                                onClick={() => handlePhotoRemoveClick(photo.id)}
+                                                disabled={removingPhotoId === photo.id}
+                                                className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                                                title="Remove photo"
+                                            >
+                                                {removingPhotoId === photo.id ? (
+                                                    <span className="text-xs">...</span>
+                                                ) : (
+                                                    <span className="text-lg leading-none">×</span>
+                                                )}
+                                            </button>
+                                        )}
                                     </div>
                                 )) : null
                             }
@@ -311,6 +451,16 @@ function UserProfile() {
                 </div>
                 {isBlockAreYouSureModelOpen && <AreYouSureOverlay actionType="Block" onContinue={handleBlock} onCancel={() => setIsBlockAreYouSureModelOpen(false)}/>}
                 {isFakeReportAreYouSureModelOpen && <AreYouSureOverlay actionType="ReportFakeAccout" onContinue={handleFakeAccountReport} onCancel={() => setIsFakeReportAreYouSureModelOpen(false)}/>}
+                {isRemovePhotoModalOpen && (
+                    <AreYouSureOverlay 
+                        actionType="Remove Photo" 
+                        onContinue={handlePhotoRemove} 
+                        onCancel={() => {
+                            setIsRemovePhotoModalOpen(false);
+                            setPhotoToRemove(null);
+                        }}
+                    />
+                )}
             </div>
         </div>
     )

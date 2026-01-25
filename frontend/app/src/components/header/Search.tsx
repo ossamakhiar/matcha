@@ -45,7 +45,7 @@ function Search({isSmallSearchOpen, handleSearchOpen, handleSearchClose}: Search
                 const data = await sendLoggedInGetRequest(`${import.meta.env.VITE_LOCAL_SEARCH}?s=${e.target.value}`);
                 setSearchResults(data);
             } catch (e) {
-                console.log('search results Request Error')
+                // Search failed silently
             }
         })()
     }

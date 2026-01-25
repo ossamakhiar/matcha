@@ -31,13 +31,10 @@ export async function sendEmailVerificationService(email: string, firstname: str
 export async function sendForgetPasswordEmailService(email: string, resetToken: string): Promise<void> {
     const resetUrl = `${process.env.EMAIL_PASSWORD_RESET_URL}?token=${resetToken}`;
 
-    console.log(`sending the email... URL: ${resetUrl}`);
     await transporter.sendMail({
         from: 'Matcha <no-reply@myapp.com>',
         to: email,
         subject: 'Password Reset',
         html: getForgetPasswordEmailBody(resetUrl, email)
     });
-
-    console.log('reset email sent!');
 }

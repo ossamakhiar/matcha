@@ -3,7 +3,6 @@ import { DmListType, MessageKind } from "../../types";
 // Dm bar
 function formatMessage(messageType: MessageKind, message: string, isSender: boolean) {
     let displayedMessage = message; 
-    console.log(messageType)
     if (messageType === "event")
         return `📅 event proposal`;
 

@@ -73,7 +73,6 @@ export function InteractiveMap({ onClose, recommendedProfiles }: InteractiveMapP
   const userInfo = useCurrentUserInfo();
   const ref = useOutsideClick(onClose);
 
-  console.log(userInfo);
   if (!userInfo) return null;
 
   const users = recommendedProfiles.map(user => {
@@ -93,9 +92,6 @@ export function InteractiveMap({ onClose, recommendedProfiles }: InteractiveMapP
     latitude: userInfo.latitude,
     profilePicture: userInfo.profilePicture
   });
-
-  console.log('USERSSSS: ');
-  console.log(users);
 
   const pins = useMemo(
     () =>

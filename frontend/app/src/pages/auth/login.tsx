@@ -4,6 +4,7 @@ import * as Yup from "yup";
 import { sendActionRequest } from "../../utils/httpRequests";
 import { useState } from "react";
 import ForgotPasswordModal from "../../components/auth/ForgotPasswordModel";
+import { toast } from "../../utils/toast";
 
 // Validation schema
 const LoginSchema = Yup.object().shape({
@@ -29,6 +30,7 @@ export default function Login() {
         try {
             await sendActionRequest('POST', import.meta.env.VITE_LOCAL_LOGIN_API_URL as string, values);
 
+            toast.success('Login successful!');
             setTimeout(() => {
                 navigate('/profile');
             }, 500);
@@ -37,7 +39,6 @@ export default function Login() {
         } catch (error) {
             setShowForgotPasswordMessage(false);
             setShowErrorMessage(true);
-            console.log(error);
         } finally {
             setSubmitting(false);
         }
@@ -48,9 +49,9 @@ export default function Login() {
             await sendActionRequest('POST', import.meta.env.VITE_LOCAL_FORGOT_PASSWORD_API_URL as string, { email });
             setShowForgotPasswordMessage(true);
             setShowForgotPasswordErrorMessage(false);
+            toast.success('Password reset email sent');
         } catch (error) {
             setShowForgotPasswordErrorMessage(true);
-            console.log(error);
         } finally {
             setIsModalOpen(false);
         }

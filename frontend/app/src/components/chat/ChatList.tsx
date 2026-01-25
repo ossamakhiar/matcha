@@ -12,8 +12,6 @@ import ChatListHeader from "./ChatListHeader";
 // to make the rendering more efficient, because sometimes i'm inserting new Dms in the front
 // it will be naive to mutate every dm in the DOM redundantly (lastly i understand why the index of the array should not be used as a key)
 const   DmsList = ({data, onClick} : {data: DmListType[], onClick: (id: number) => void}) => {
-    // console.log(data);
-
     return (
         <div className="w-full h-full" >
             {(data) && data.map((dm) => {
@@ -65,7 +63,6 @@ function    markAsReadById(dms: DmListType[] | undefined, dmId: number): DmListT
 const    ChatSearchResults = ({data, searchInput, onClick}: {searchInput: string, data: {dms: FetchedData, contacts: FetchedData, favorites: {data: DmListType[]}}, onClick: (dmId: number) => void}) => {
     const fullname = (firstName: string, lastName: string) => ((firstName + ' ' + lastName).toLowerCase());
 
-    console.log(searchInput);
     const dms = data.dms.data?.filter((dm) => fullname(dm.firstName, dm.lastName).includes(searchInput) || dm.username?.includes(searchInput)) || [];
     const contacts = data.contacts.data?.filter((dm) => fullname(dm.firstName, dm.lastName).includes(searchInput) || dm.username?.includes(searchInput)) || [];
 
@@ -154,24 +151,19 @@ const timerRef = useRef<NodeJS.Timeout | null>(null);
 
     // fetch more data based on the current selected tab
     const handleDmListScroll = async (e: React.UIEvent<HTMLDivElement>) => {
-        console.log(isScrollEnabled)
         if (!isScrollEnabled) {
             return ;
         }
         const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
         // scrollRefs.current[tab] = scrollTop; // Update the scroll position for the current tab
 
-        // console.log(`tabScroll: ${scrollRefs.current[tab]}`);
-        console.log(`dmList scroll: ${scrollTop} ${scrollHeight} ${clientHeight}`)
         if (scrollHeight - scrollTop <= clientHeight + 10) {
 
             if (tab === 'dms') {
                 // when switching tabs it gets called
-                console.log('fetching more dms')
                 // dms.fetchMoreData();
             }
             else if (tab === 'contacts') {
-                console.log('fetching more contacts')
                 // contacts.fetchMoreData();
             }
         }
@@ -192,7 +184,6 @@ const timerRef = useRef<NodeJS.Timeout | null>(null);
         setScrollEnabled(false);
         if (timerRef.current) {
             clearTimeout(timerRef.current);
-            console.log('clearing')
         }
 
         timerRef.current = setTimeout(() => setScrollEnabled(true), 2000);

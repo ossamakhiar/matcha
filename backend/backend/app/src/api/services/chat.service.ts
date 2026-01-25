@@ -49,7 +49,6 @@ export async function getContactsService(userId: number) {
     try {
         results = await client.query(retrieveQuery, [userId]);
     } catch (e) {
-        console.log(e);
         throw (e);
     } finally {
         client.release();
@@ -137,9 +136,7 @@ export async function retrieveDms(userId: number) {
 
 
     try {
-        console.log('get dfms')
         const results = await client.query(query, [userId]);
-        console.log(results.rows);
 
         // ! Adding is it online
         return (results.rows.map((dm) => ({
@@ -156,7 +153,6 @@ export async function retrieveDms(userId: number) {
             isFavorite: dm.is_favorite,
         })));
     } catch (e) {
-        console.log(e)
         throw e;
     } finally {
         client.release();
@@ -427,7 +423,6 @@ export async function MarkMessageAsRead(messageId: number) {
 
     try {
         const res = await client.query(query, [messageId]);
-        console.log('message maked as read');
     } catch (e) {
         throw (e);
     } finally {

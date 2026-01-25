@@ -103,8 +103,6 @@ function createDmsUpdateFunc(
 
 function registerSocketEvents(activeDmId: number, setDms: ReactSetter<DmListType[] | undefined>, setContacts: ReactSetter<DmListType[] | undefined>) {
     const userPresenceHandler = (onlineUsers: number[]) => {
-        console.log('online-users:', onlineUsers);
-
         // Modify dms presence, changing the status (online, offline)
         const mutateDms = (dms: DmListType[] | undefined) => dms && changeParticipantPresence(dms, onlineUsers);
 
@@ -133,7 +131,6 @@ function registerSocketEvents(activeDmId: number, setDms: ReactSetter<DmListType
 
 
 const   handleFevoritesChange = (dmId: number, setDms: ReactSetter<DmListType[] | undefined>) => {
-    console.log(`${dmId} fav changing..`);
     setDms((prev) => {
         if (!prev) return (prev);
         const index = prev.findIndex((dm) => dm.id === dmId);

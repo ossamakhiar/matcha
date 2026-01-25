@@ -44,7 +44,7 @@ function usePaginatedFetch<T>(url: string, uriQuery?: Record<string, string>) : 
             setData((prev) => [...(prev || []), ...data]);
             setPage((prevPage) => prevPage + 1);
         } catch (e) {
-            console.log(e);
+            // Pagination fetch failed silently
         }
     }
 

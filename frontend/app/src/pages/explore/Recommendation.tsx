@@ -131,15 +131,11 @@ const Recommendation = () => {
                 requestBody['interests'] = [...interests];
             }
 
-            console.log(requestBody);
-
             const responseBody = await sendLoggedInActionRequest(
                 'POST', 
                 import.meta.env.VITE_LOCAL_RECOMMENDED_PROFILES_API_URL, 
                 requestBody
             );
-
-            console.log('Recommendation recommendedProfiles: ', responseBody.recommendedProfiles);
 
             if (!responseBody?.recommendedProfiles
                 || !Array.isArray(responseBody.recommendedProfiles)

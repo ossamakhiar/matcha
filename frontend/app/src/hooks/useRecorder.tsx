@@ -23,7 +23,7 @@ function    useRecorder() {
             };
             mediaRecorder.start();
         } catch (e) {
-            console.log(e);
+            // Failed to start recording
         }
     }
     const stopRecording = useCallback(() => {

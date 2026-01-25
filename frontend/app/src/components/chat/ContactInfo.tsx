@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 import { useSocket } from "../../context/SocketProvider";
 import { sendLoggedInActionRequest } from "../../utils/httpRequests";
 import eventObserver from "../../utils/eventObserver";
+import { toast } from "../../utils/toast";
 
 type    DropdownItemType = {
     title: string,
@@ -90,9 +91,10 @@ function getDropdownItems() : DropdownItemType[] {
             await sendLoggedInActionRequest('POST', import.meta.env.VITE_LOCAL_PROFILE_BLOCK_API_URL + `/${activeDmId}`);
             eventObserver.publish(EventsEnum.APP_BLOCK_CHAT_UNLIKE, activeDmId);
             setActiveDmId(-1);
+            toast.success('User blocked successfully');
         }
         catch (err) {
-            console.log(err);
+            toast.error('Failed to block user');
         }
         // emit the Block event to the Dms List  Component
     }
@@ -106,11 +108,11 @@ function getDropdownItems() : DropdownItemType[] {
             // ? **************
             eventObserver.publish(EventsEnum.APP_BLOCK_CHAT_UNLIKE, activeDmId);
             setActiveDmId(-1);
+            toast.success('Unliked successfully');
         }
         catch (err) {
-            console.log(err);
+            toast.error('Failed to unlike');
         }
-        console.log(`unlike ${activeDmId}`);
     }
 
 
@@ -125,7 +127,6 @@ const ContactInfo = () => {
     const { activeDmId } = useActiveDm();
     const [contactDetails, setContactDetails] = useFetch<ContactDetailsType>(`${import.meta.env.VITE_LOCAL_CHAT_CONTACT_INFO}/${activeDmId}`, [activeDmId]);
 
-    console.log(contactDetails)
     registerEventHandlers(setContactDetails);
 
     const dropdowns = getDropdownItems();

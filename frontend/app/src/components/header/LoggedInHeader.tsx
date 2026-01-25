@@ -6,6 +6,7 @@ import Notification from "../notification/Notification";
 import { FaBell } from "react-icons/fa6";
 import { sendLoggedInActionRequest } from "../../utils/httpRequests";
 import HamburgerMenuOverlay from "./HamburgerMenuOverlay";
+import { toast } from "../../utils/toast";
 
 function LoggedInHeader() {
     let [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -30,12 +31,13 @@ function LoggedInHeader() {
         try {
             await sendLoggedInActionRequest('POST', import.meta.env.VITE_LOCAL_LOGOUT_API_URL);
 
+            toast.success('Logged out successfully');
             setTimeout(() => {
                 navigate('/login');
             }, 300);
         }
         catch (err) {
-            console.log(err);
+            toast.error('Failed to logout');
         }
     }
 

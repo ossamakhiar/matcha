@@ -6,6 +6,7 @@ import { ProfileInfo } from '../../types/profile';
 import { sendFormDataRequest } from '../../utils/httpRequests';
 import { getFormError } from '../../utils/typeGuards';
 import ImageEditorModal from './ImageEditorModal';
+import { toast } from '../../utils/toast';
 
 type EditProfileOverlayProps = {
     profileInfo: ProfileInfo;
@@ -91,7 +92,6 @@ function EditProfileOverlay({ profileInfo, handleEditOverlayClose }: EditProfile
         if (image) {
             formData.append('profilePicture', image);
         }
-        console.log(...formData);
 
         try {
             let responseBody = await sendFormDataRequest('POST', import.meta.env.VITE_LOCAL_UPDATE_PERSONAL_INFO_API_URL as string, formData);
@@ -110,12 +110,13 @@ function EditProfileOverlay({ profileInfo, handleEditOverlayClose }: EditProfile
                 newProfileInfo.userInfo.profilePicture = responseBody.imageUrl;
             }
 
+            toast.success('Profile updated successfully');
             handleEditOverlayClose(newProfileInfo);
         } catch (error) {
             let formError = getFormError(error);
 
             if (formError === undefined) {
-                console.log('Unexpected error structure: ' + error);
+                toast.error('An unexpected error occurred');
                 return ;
             }
 
@@ -132,7 +133,7 @@ function EditProfileOverlay({ profileInfo, handleEditOverlayClose }: EditProfile
                 return ;
             }
 
-            console.error('Unhandled field: ', field);
+            toast.error(`Error updating ${field}: ${message}`);
 
         } finally {
             setSubmitting(false);

@@ -5,6 +5,7 @@ import { sendFormDataRequest } from "../../utils/httpRequests";
 import { useNavigate } from "react-router-dom";
 import { getCookie } from "../../utils/generalPurpose";
 import { CompleteProfileNextStep } from "../../types/enums";
+import { toast } from "../../utils/toast";
 
 type ImageCardsProps = {
     images: File[];
@@ -68,7 +69,6 @@ export default function ProfileSetup() {
             }
             return [...prev, ...newArray];
         });
-        // console.log(files);
     }
 
     const handleRemove = (index: number) => {
@@ -77,6 +77,7 @@ export default function ProfileSetup() {
 
     const onConfirm = async () => {
         if (images.length === 0) {
+            toast.error('Please select at least one image');
             return ;
         }
 
@@ -86,19 +87,16 @@ export default function ProfileSetup() {
             formData.append('image', image);
         });
 
-        for (let pair of formData.entries()) {
-            console.log(`${pair[0]}: ${pair[1]}`);
-        }
-
         try {
             await sendFormDataRequest('POST', import.meta.env.VITE_LOCAL_COMPLETE_PROFILE_PHOTOS_API_URL as string, formData);
 
+            toast.success('Photos uploaded successfully');
             setTimeout(() => {
                 navigate('/profile');
             }, 1000);
         }
         catch (err) {
-            console.log(err);
+            toast.error('Failed to upload photos');
         }
     }
 

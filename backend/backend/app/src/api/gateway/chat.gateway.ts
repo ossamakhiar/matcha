@@ -17,7 +17,6 @@ async function persistMessage(
   receiverId: number,
   msg: IncomingMessagePayload
 ): Promise<PresentedDm> {
-    console.log(msg)
   switch (msg.messageType) {
     case "text": {
         const row = await createNewDm({

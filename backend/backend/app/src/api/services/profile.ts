@@ -23,7 +23,6 @@ export async function getUserInterests(userId: number): Promise<string[]> {
         return (interests);
     }
     catch (err) {
-        console.log('this is userId: ' + userId);
         throw new Error('failed to retrieve brief profile interests');
     } finally {
         if (client) {
@@ -390,8 +389,6 @@ export async function unlikeProfileService(likingUserId: number, likedUserId: nu
             return ;
         }
 
-        console.log('deleteResult > 0');
-
         const updateLikesCountQuery = `
             UPDATE "user"
             SET likes_count = likes_count - 1
@@ -432,7 +429,6 @@ export async function isBlockedService(blockingUserId: number, blockedUserId: nu
             FROM blocked_users 
             WHERE blocking_user_id = $1 AND blocked_user_id = $2
         `;
-        console.log(blockedUserId, blockingUserId);
         const result = await client.query(query, [blockingUserId, blockedUserId]);
 
         return result.rows.length > 0;

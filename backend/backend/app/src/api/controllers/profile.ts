@@ -63,8 +63,6 @@ export async function getCurrBriefProfileInfoController(request: Request, respon
         const userId = request.user.id;
         const profileInfo = await getBriefProfileInfoService(userId);
 
-        console.log('userId: ' + userId);
-
         if (!profileInfo) {
             response.status(404).send( { msg: 'user not found' } );
             return ;
@@ -171,7 +169,6 @@ export async function likeProfileController(request: Request, response: Response
     const likedUserId = Number(request.params.userId);
 
     if (userId === likedUserId) {
-        console.log('bad like request');
         response.sendStatus(400);
         return ;
     }    

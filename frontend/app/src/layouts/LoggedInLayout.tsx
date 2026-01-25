@@ -21,7 +21,6 @@ const LocationBootstrap = () => {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const { latitude, longitude } = pos.coords;
-          console.log(`geolocation coords: ${latitude}, ${longitude}`);
   
           sendLoggedInActionRequest("POST", locationUrl, {
             latitude,
@@ -33,13 +32,11 @@ const LocationBootstrap = () => {
           const data = await sendGetRequestWithoutCreds('http://ip-api.com/json/?fields=lat,lon');
 
           if (!data || !isOfCoordsType(data)) {
-            console.log('IP fallback failed!!');
             return;
           }
 
           // store coords got from IP fallback
           const { lat, lon } = data;
-          console.log(`IP fallback coords: ${lat}, ${lon}`);
           sendLoggedInActionRequest("POST", locationUrl, {
             latitude: lat,
             longitude: lon

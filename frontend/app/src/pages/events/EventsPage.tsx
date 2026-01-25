@@ -9,6 +9,7 @@ import { EventsCalendar } from "./EventsCalendar";
 import { EditEventModal } from "./EditEventModal";
 import { useSocket } from "../../context/SocketProvider";
 import { EventsEnum } from "../../types/EventsEnum";
+import { toast } from "../../utils/toast";
 
 const EventsPage = () => {
     const [events, setEvents] = useState<ScheduledEvent[]>([]);
@@ -30,7 +31,7 @@ const EventsPage = () => {
             const eventsData = Array.isArray(response.data) ? response.data : response;
             setEvents(Array.isArray(eventsData) ? eventsData : []);
         } catch (error) {
-            console.error('Error fetching events:', error);
+            toast.error('Failed to fetch events');
             setEvents([]);
         } finally {
             setLoading(false);
@@ -49,9 +50,10 @@ const EventsPage = () => {
                             : event
                     )
                 );
+                toast.success(`Event ${action}ed successfully`);
             }
         } catch (error) {
-            console.error('Error responding to event:', error);
+            toast.error(`Failed to ${action} event`);
         }
     };
 
@@ -59,8 +61,9 @@ const EventsPage = () => {
         try {
             await sendLoggedInActionRequest('PATCH', `${import.meta.env.VITE_API_URL}/events/${eventId}`, updates);
             await fetchEvents();
+            toast.success('Event updated successfully');
         } catch (error) {
-            console.error('Error updating event:', error);
+            toast.error('Failed to update event');
         }
     };
 

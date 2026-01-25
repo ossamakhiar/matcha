@@ -8,6 +8,7 @@ import exploreRouter from './explore.js'
 import searchRouter from './search.js'
 import oauthRouter from './oauth.js'
 import historyRouter from './history.js'
+import eventRouter from './event.routes.js'
 
 const router = Router();
 
@@ -22,5 +23,6 @@ router.use(exploreRouter);
 
 router.use(searchRouter)
 router.use(historyRouter);
+router.use(eventRouter);
 
 export default router;

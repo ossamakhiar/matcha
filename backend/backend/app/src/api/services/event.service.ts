@@ -66,6 +66,64 @@ export async function getEventById(eventId: number): Promise<UserEvent | null> {
     }
 }
 
+/**
+ * Get all events for a user (both created by them and received)
+ */
+export async function getUserEvents(userId: number): Promise<any[]> {
+    const query = `
+        SELECT 
+            e.id,
+            e.creator_id,
+            e.title,
+            e.event_date,
+            e.event_status,
+            e.notes,
+            e.created_at,
+            d.sender_id,
+            d.receiver_id,
+            u.id as partner_id,
+            u.first_name,
+            u.last_name,
+            u.profile_picture
+        FROM "event" e
+        JOIN "dm" d ON d.event_id = e.id
+        JOIN "user" u ON u.id = CASE 
+            WHEN d.sender_id = $1 THEN d.receiver_id 
+            ELSE d.sender_id 
+        END
+        WHERE (d.sender_id = $1 OR d.receiver_id = $1)
+        ORDER BY e.event_date DESC;
+    `;
+
+    const dbClient = await pool.connect();
+    try {
+        const results = await dbClient.query(query, [userId]);
+        
+        return results.rows.map(row => ({
+            id: row.id,
+            creatorId: row.creator_id,
+            title: row.title,
+            eventDate: row.event_date,
+            eventStatus: row.event_status,
+            notes: row.notes,
+            createdAt: row.created_at,
+            isCreator: row.creator_id === userId,
+            partner: {
+                id: row.partner_id,
+                firstName: row.first_name,
+                lastName: row.last_name,
+                profilePicture: row.profile_picture 
+                    ? `${process.env.BASE_URL}/${row.profile_picture}` 
+                    : process.env.DEFAULT_PROFILE_PICTURE
+            }
+        }));
+    } catch (e) {
+        throw e;
+    } finally {
+        dbClient.release();
+    }
+}
+
 
 export async function validateUsersMatched(userId1: number, userId2: number): Promise<boolean> {
     const query = `SELECT CASE WHEN COUNT(*) = 2 THEN true ELSE false END AS are_matched
@@ -163,6 +221,68 @@ export async function updateEventStatus(
         };
     } catch (e) {
         await dbClient.query('ROLLBACK');
+        throw e;
+    } finally {
+        dbClient.release();
+    }
+}
+
+export async function updateEvent(
+    eventId: number,
+    updates: { title?: string; eventDate?: string; notes?: string }
+): Promise<UserEvent> {
+    const dbClient = await pool.connect();
+
+    try {
+        const updateFields = [];
+        const updateValues = [];
+        let paramIndex = 1;
+
+        if (updates.title !== undefined) {
+            updateFields.push(`title = $${paramIndex++}`);
+            updateValues.push(updates.title);
+        }
+        if (updates.eventDate !== undefined) {
+            updateFields.push(`event_date = $${paramIndex++}`);
+            updateValues.push(updates.eventDate);
+        }
+        if (updates.notes !== undefined) {
+            updateFields.push(`notes = $${paramIndex++}`);
+            updateValues.push(updates.notes);
+        }
+
+        if (updateFields.length === 0) {
+            throw new ApplicationError('No fields to update');
+        }
+
+        updateValues.push(eventId);
+
+        const updateQuery = `
+            UPDATE "event"
+            SET ${updateFields.join(', ')}
+            WHERE id = $${paramIndex}
+            RETURNING id, creator_id, title, event_date, event_status, notes, created_at;
+        `;
+
+        const result = await dbClient.query(updateQuery, updateValues);
+
+        if (result.rows.length === 0) {
+            throw new ApplicationError('Event not found');
+        }
+
+        const updatedRow = result.rows[0];
+
+        return {
+            id: updatedRow.id,
+            creatorId: updatedRow.creator_id,
+            title: updatedRow.title,
+            eventDate: updatedRow.event_date,
+            notes: updatedRow.notes,
+            createdAt: updatedRow.created_at,
+            eventStatus: updatedRow.event_status,
+            canRespond: false
+        };
+    } catch (e) {
         throw e;
     } finally {
         dbClient.release();

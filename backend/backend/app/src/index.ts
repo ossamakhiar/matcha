@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser'
 import fs from 'fs'
 import passport from 'passport'
 import { setupOauth } from './api/middlewares/oauthSetup.js'
+import { Request, Response, NextFunction } from 'express'
 
 dotenv.config();
 
@@ -33,6 +34,24 @@ setupOauth(passport);
 app.use(passport.initialize());
 
 app.use(routes);
+
+// Global error handler - must be after all routes
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    console.error('Global error handler:', err);
+    
+    // Don't send response if headers already sent
+    if (res.headersSent) {
+        return next(err);
+    }
+    
+    // Send a proper error response
+    const statusCode = err.statusCode || err.status || 500;
+    res.status(statusCode).json({
+        error: 'Internal server error',
+        message: err.message || 'An unexpected error occurred',
+        ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    });
+});
 
 const http_server = app.listen(API_PORT, () => {
     console.log(`server listening on port ${API_PORT}`);

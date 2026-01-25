@@ -18,6 +18,7 @@ import { blockMiddleware, validateUserIdParam, validStoreUserLocation } from "..
 import { validateJwtToken, validateCSRFCookies } from "../middlewares/authorization.js";
 import { validateCompleteProfileBody } from "../middlewares/complete-info.js";
 import upload from "../middlewares/upload.js";
+import { multerErrorHandler } from "../middlewares/multerErrorHandler.js";
 
 const router = Router();
 
@@ -33,8 +34,8 @@ router.post('/block/:userId', validateUserIdParam, blockMiddleware, blockUserCon
 router.post('/reportFakeAccount/:userId', validateUserIdParam, blockMiddleware, reportFakeAccountController);
 router.post('/likeProfile/:userId', validateUserIdParam, blockMiddleware, likeProfileController);
 router.post('/unlikeProfile/:userId', validateUserIdParam, blockMiddleware, unlikeProfileController);
-router.post('/updatePersonalInfo', upload.single('profilePicture'), validateCompleteProfileBody, updatePersonalInfoController);
-router.post('/addPhotos', upload.array('image', 4), addPhotosController);
+router.post('/updatePersonalInfo', upload.single('profilePicture'), multerErrorHandler, validateCompleteProfileBody, updatePersonalInfoController);
+router.post('/addPhotos', upload.array('image', 4), multerErrorHandler, addPhotosController);
 router.delete('/removePhoto', removePhotoController);
 router.post("/send-location", validStoreUserLocation, storeUserLocation)
 

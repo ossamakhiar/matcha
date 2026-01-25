@@ -55,17 +55,15 @@ export function validateCSRFCookies(request: Request, response: Response, next: 
 
     if (!secretCookie || !clientAccessibleCookie
         || typeof secretCookie != 'string' || typeof clientAccessibleCookie != 'string') {
-        clearAllCookies(response);
-        // send a notification to warn the user of a csrf attack attempt
 
-        response.status(401).send( { msg: 'not authorized' } );
+        response.status(401).send( { msg: 'not authorized', error: 'csrf_validation_failed' } );
         return ;
     }
 
     if (secretCookie != clientAccessibleCookie) {
+        // Don't clear cookies on CSRF mismatch - could be a temporary issue
         // send a notification to warn the user of a csrf attack attempt
-        clearAllCookies(response);
-        response.status(401).send( { msg: 'not authorized' } );
+        response.status(401).send( { msg: 'not authorized', error: 'csrf_mismatch' } );
         return ;
     }
 

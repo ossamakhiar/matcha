@@ -1,4 +1,5 @@
 import { getCookie } from "./generalPurpose";
+import { toast } from "./toast";
 
 export async function sendActionRequest(method: string, url: string, data: any, token?: string) {
     const headers: { [key: string]: string } = {
@@ -34,6 +35,14 @@ export async function sendActionRequest(method: string, url: string, data: any, 
 export async function sendFormDataRequest(method: string, url: string, formData: FormData) {
     const csrfClientExposedCookie = getCookie('csrfClientExposedCookie');
 
+    if (!csrfClientExposedCookie) {
+        toast.error('Your session has expired. Please log in again.');
+        setTimeout(() => {
+            document.location.href = import.meta.env.VITE_LOCAL_FRONTEND_LOGIN_URL;
+        }, 2000);
+        throw new Error('CSRF token is missing');
+    }
+
     const headers: { [key: string]: string } = {
         'Authorization': `Bearer ${csrfClientExposedCookie}`
     }
@@ -54,14 +63,21 @@ export async function sendFormDataRequest(method: string, url: string, formData:
     }
 
     if (response.status === 401) {
-        document.location.href = import.meta.env.VITE_LOCAL_FRONTEND_LOGIN_URL;
+        toast.error('Your session has expired. Redirecting to login...');
+        setTimeout(() => {
+            document.location.href = import.meta.env.VITE_LOCAL_FRONTEND_LOGIN_URL;
+        }, 1500);
+        throw new Error('Unauthorized');
     }
 
     if (response.status === 403 && responseBody.url) {
         document.location.href = responseBody.url;
+        throw new Error('Forbidden');
     }
 
     if (!response.ok) {
+        const errorMessage = responseBody?.message || responseBody?.msg || 'Upload failed. Please try again.';
+        toast.error(errorMessage);
         throw (responseBody?.error ?? responseBody ?? 'uknown error occurred');
     }
 
@@ -71,6 +87,14 @@ export async function sendFormDataRequest(method: string, url: string, formData:
 // loosely typed for now
 export async function sendLoggedInActionRequest(method: string, url: string, data?: any, contentType?: string) {
     const csrfClientExposedCookie = getCookie('csrfClientExposedCookie');
+
+    if (!csrfClientExposedCookie) {
+        toast.error('Your session has expired. Please log in again.');
+        setTimeout(() => {
+            document.location.href = import.meta.env.VITE_LOCAL_FRONTEND_LOGIN_URL;
+        }, 2000);
+        throw new Error('CSRF token is missing');
+    }
 
     const headers: { [key: string]: string } = {
         'Content-Type': 'application/json',
@@ -103,11 +127,16 @@ export async function sendLoggedInActionRequest(method: string, url: string, dat
     }
 
     if (response.status === 401) {
-        document.location.href = import.meta.env.VITE_LOCAL_FRONTEND_LOGIN_URL;
+        toast.error('Your session has expired. Redirecting to login...');
+        setTimeout(() => {
+            document.location.href = import.meta.env.VITE_LOCAL_FRONTEND_LOGIN_URL;
+        }, 1500);
+        throw new Error('Unauthorized');
     }
 
     if (response.status === 403 && responseBody.url) {
         document.location.href = responseBody.url;
+        throw new Error('Forbidden');
     }
 
     if (!response.ok) {
@@ -119,6 +148,14 @@ export async function sendLoggedInActionRequest(method: string, url: string, dat
 
 export async function sendLoggedInGetRequest(url: string) {
     const csrfClientExposedCookie = getCookie('csrfClientExposedCookie');
+
+    if (!csrfClientExposedCookie) {
+        toast.error('Your session has expired. Please log in again.');
+        setTimeout(() => {
+            document.location.href = import.meta.env.VITE_LOCAL_FRONTEND_LOGIN_URL;
+        }, 2000);
+        throw new Error('CSRF token is missing');
+    }
 
     const response = await fetch(url, {
         method: "GET",
@@ -137,11 +174,16 @@ export async function sendLoggedInGetRequest(url: string) {
     }
 
     if (response.status === 401) {
-        document.location.href = import.meta.env.VITE_LOCAL_FRONTEND_LOGIN_URL;
+        toast.error('Your session has expired. Redirecting to login...');
+        setTimeout(() => {
+            document.location.href = import.meta.env.VITE_LOCAL_FRONTEND_LOGIN_URL;
+        }, 1500);
+        throw new Error('Unauthorized');
     }
 
     if (response.status === 403 && responseBody.url) {
         document.location.href = responseBody.url;
+        throw new Error('Forbidden');
     }
 
     if (!response.ok) {

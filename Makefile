@@ -10,7 +10,7 @@ logs:
 	@docker compose logs
 
 clean:
-	@docker image rm postgres
+	@docker image rm postgres &> /dev/null
 	@docker volume rm $$(docker volume ls -q)
 	# @docker image rm -f $$(docker images -q)
 

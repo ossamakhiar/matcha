@@ -1,17 +1,18 @@
 import { createContext, ReactNode, useContext } from 'react';
 import { io, Socket } from "socket.io-client";
-// import eventObserver from '../utils/eventObserver';
-// import { GlobalEventEnum } from '../types/globalEventEnum';
 
 type Props = {
     children: ReactNode;
 }
 
 const   SocketContext = createContext<Socket | null>(null);
-const   IO_SERVER_URL = import.meta.env.VITE_API_URL;
 
 const   SocketProvider = ({children}: Props) => {
-    const   socket = io(IO_SERVER_URL, {withCredentials: true})
+    const socket = io("https://assists-programme-commons-monthly.trycloudflare.com", {
+        path: "/socket.io",
+        transports: ["websocket"],
+        secure: true,
+      });
 
     return (
         <SocketContext.Provider value={socket}>

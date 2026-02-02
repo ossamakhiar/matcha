@@ -35,3 +35,19 @@ https://github.com/user-attachments/assets/e04d8ed8-2bc9-4e83-b2cf-7c550e0d307b
 ### Frontend Engineering:
 - Created fully responsive interfaces with ReactJS, minimizing backend requests and optimizing rendering.
 - Designed the frontend using Figma and implemented it with Tailwind CSS.
+
+
+### Cloudflare Tunnels
+#### installation
+```bash
+wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -O ~/bin/cloudflared
+
+# Give it permission to run
+chmod +x ~/bin/cloudflared
+
+```
+
+#### create a temporary cloudflare tunnel
+```bash
+cloudflared tunnel --url <nginx-proxy-url>
+```

@@ -8,7 +8,7 @@ type Props = {
 const   SocketContext = createContext<Socket | null>(null);
 
 const   SocketProvider = ({children}: Props) => {
-    const socket = io("https://assists-programme-commons-monthly.trycloudflare.com", {
+    const socket = io(import.meta.env.WEBSOCKET_URL, {
         path: "/socket.io",
         transports: ["websocket"],
         secure: true,

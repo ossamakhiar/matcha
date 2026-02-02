@@ -40,7 +40,7 @@ https://github.com/user-attachments/assets/e04d8ed8-2bc9-4e83-b2cf-7c550e0d307b
 ### Cloudflare Tunnels
 #### installation
 ```bash
-wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -O ~/bin/cloudflared
+mkdir ~/bin; wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -O ~/bin/cloudflared
 
 # Give it permission to run
 chmod +x ~/bin/cloudflared

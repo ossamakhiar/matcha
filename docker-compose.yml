@@ -8,8 +8,8 @@ services:
     env_file: ./backend/database/.env
     networks:
       - backend
-    # # ports:
-    # #   - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
@@ -94,3 +94,6 @@ services:
 networks:
   backend:
     driver: bridge
+
+volumes:
+  pgdata:
